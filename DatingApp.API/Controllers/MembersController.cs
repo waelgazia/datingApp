@@ -18,6 +18,7 @@ public class MembersController : BaseApiController
         _dbContext = dbContext;
     }
 
+    [AllowAnonymous]
     [HttpGet]
     public async Task<ActionResult<IReadOnlyList<AppUser>>> GetMembers()
     {
