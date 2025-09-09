@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using DatingApp.API.Base;
 using DatingApp.API.Data;
 using DatingApp.API.DTOs;
+using DatingApp.API.Mapping;
 using DatingApp.API.Entities;
 using DatingApp.API.Interfaces;
-using DatingApp.API.Extensions;
 
 namespace DatingApp.API.Controllers
 {
@@ -37,7 +37,7 @@ namespace DatingApp.API.Controllers
             _dbContext.Users.Add(newUser);
             await _dbContext.SaveChangesAsync();
 
-            return Ok(newUser.ToDto(_tokenService));
+            return Ok(newUser.ToUserDto(_tokenService));
         }
 
         private async Task<bool> EmailExists(string email)
@@ -62,7 +62,7 @@ namespace DatingApp.API.Controllers
             if (!computedHash.SequenceEqual(user.PasswordHash))
                 return Unauthorized("Invalid password!");
 
-            return Ok(user.ToDto(_tokenService));
+            return Ok(user.ToUserDto(_tokenService));
         }
     }
 }

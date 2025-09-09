@@ -8,6 +8,8 @@ public class AppDbContext : DbContext
 	private readonly IConfiguration _configuration;
 
 	public DbSet<AppUser> Users { get; set; }
+	public DbSet<Member> Members { get; set; }
+	public DbSet<Photo> Photos { get; set; }
 
 	public AppDbContext(IConfiguration configuration)
 	{

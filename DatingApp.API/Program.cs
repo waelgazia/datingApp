@@ -1,5 +1,6 @@
 using System.Text;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
@@ -17,6 +18,7 @@ builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddCors();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -45,5 +47,22 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// database seeding
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<AppDbContext>();
+        await context.Database.MigrateAsync();
+        await Seed.SeedUserAsync(context);
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError("An error occurred during migration: {0}", ex.Message);
+    }
+}
 
 app.Run();
