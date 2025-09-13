@@ -1,10 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AccountService } from '../../core/services/account-service';
 import { LoginVM } from '../../interfaces/LoginVM';
 import { ToastService } from '../../core/services/toast-service';
+import { AccountService } from '../../core/services/account-service';
 
 @Component({
   selector: 'app-nav',

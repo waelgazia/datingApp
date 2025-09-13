@@ -1,6 +1,7 @@
 import { tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 import { User } from '../../interfaces/User';
 import { LoginVM } from '../../interfaces/LoginVM';
@@ -11,12 +12,12 @@ import { RegisterVM } from '../../interfaces/RegisterVM';
 })
 export class AccountService {
   private _httpClient = inject(HttpClient);
-  private _baseUrl : string = 'https://localhost:5001/api'
+  private _baseUrl : string = environment.apiUrl;
 
   currentUser = signal<User | null>(null);
 
   login(loginVM: LoginVM) {
-    return this._httpClient.post<User>(`${this._baseUrl}/accounts/login`, loginVM).pipe(
+    return this._httpClient.post<User>(this._baseUrl + 'accounts/login', loginVM).pipe(
       tap(user => {
         if (user) {
           this.setCurrentUser(user);
@@ -31,7 +32,7 @@ export class AccountService {
   }
 
   register(registerVM: RegisterVM) {
-    return this._httpClient.post<User>(`${this._baseUrl}/accounts/register`, registerVM).pipe(
+    return this._httpClient.post<User>(this._baseUrl + 'accounts/register', registerVM).pipe(
       tap(user => {
         if (user) {
           this.setCurrentUser(user);

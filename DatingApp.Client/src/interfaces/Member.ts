@@ -1,5 +1,12 @@
 export interface Member {
-  id : string,
-  email : string,
-  displayName : string
+  id: string
+  dateOfBirth: string
+  imageUrl?: string
+  displayName: string
+  created: string
+  lastActive: string
+  gender: string
+  description?: string
+  city: string
+  country: string
 }

@@ -13,7 +13,8 @@ public static class EntityToDtoMapper
             Id = appUser.Id,
             Email = appUser.Email,
             DisplayName = appUser.DisplayName,
-            Token = tokenService.CreateToken(appUser)
+            Token = tokenService.CreateToken(appUser),
+            ImageUrl = appUser.ImageUrl
         };
     }
 

@@ -1,11 +1,12 @@
 import { ApplicationConfig, inject, provideAppInitializer, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter, withViewTransitions } from '@angular/router';
 
+import { lastValueFrom } from 'rxjs';
 import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { InitService } from '../core/services/init-service';
-import { lastValueFrom } from 'rxjs';
+import { jwtInterceptor } from '../core/interceptors/jwt-interceptor';
 import { errorInterceptor } from '../core/interceptors/error-interceptor';
 
 export const appConfig: ApplicationConfig = {
@@ -13,7 +14,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withViewTransitions() /* add transition animation when routing */),
-    provideHttpClient(withInterceptors([ errorInterceptor ])),
+    provideHttpClient(withInterceptors([ errorInterceptor, jwtInterceptor ])),
     provideAppInitializer(async () => { /* execute code before loading components */
       const initService = inject(InitService);
       return new Promise<void>((resolve) => {

@@ -37,7 +37,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           case 500:
             // use NavigationExtras pass a state (data) to a router and can be accessed
             // this data in the component's constructor (ServerError in this case)
-            const navigationExtras: NavigationExtras = {state: { error: error.error }}
+            const navigationExtras: NavigationExtras = { state: { error: error.error }}
             router.navigateByUrl('/server-error', navigationExtras);
             break;
 
