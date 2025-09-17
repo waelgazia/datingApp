@@ -3,7 +3,8 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { themes } from '../theme';
-import { LoginVM } from '../../interfaces/LoginVM';
+import { LoginVM } from '../../interfaces/models/LoginVM';
+import { BusyService } from '../../core/services/busy-service';
 import { ToastService } from '../../core/services/toast-service';
 import { AccountService } from '../../core/services/account-service';
 
@@ -17,6 +18,7 @@ export class Nav implements OnInit{
   private _router = inject(Router)
   private _toastService = inject(ToastService);
 
+  protected busyService = inject(BusyService);
   protected accountService = inject(AccountService);
   protected loginVM = {} as LoginVM;
 

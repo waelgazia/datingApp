@@ -2,7 +2,7 @@ import { EMPTY } from 'rxjs';
 import { inject } from '@angular/core';
 import { ResolveFn, Router } from '@angular/router';
 
-import { Member } from '../../interfaces/Member';
+import { Member } from '../../interfaces/models/Member';
 import { MemberService } from '../../core/services/member-service';
 
 export const memberResolver: ResolveFn<Member> = (route, state) => {

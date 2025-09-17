@@ -3,7 +3,7 @@ import { AsyncPipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Component, inject } from '@angular/core';
 
-import { Photo } from '../../../interfaces/Photo';
+import { Photo } from '../../../interfaces/models/Photo';
 import { MemberService } from '../../../core/services/member-service';
 
 @Component({

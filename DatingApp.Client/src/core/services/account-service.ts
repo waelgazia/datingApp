@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 
-import { User } from '../../interfaces/User';
-import { LoginVM } from '../../interfaces/LoginVM';
-import { RegisterVM } from '../../interfaces/RegisterVM';
+import { User } from '../../interfaces/models/User';
+import { LoginVM } from '../../interfaces/models/LoginVM';
+import { RegisterVM } from '../../interfaces/models/RegisterVM';
 
 @Injectable({
   providedIn: 'root'

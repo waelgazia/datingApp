@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 
-import { Member } from '../../../interfaces/Member';
+import { Member } from '../../../interfaces/models/Member';
 import { MemberCard } from '../member-card/member-card';
 import { MemberService } from '../../../core/services/member-service';
 

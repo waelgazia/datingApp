@@ -15,14 +15,18 @@
 
     <nav class="flex gap-3 my-2 uppercase text-lg text-white">
       @if(accountService.currentUser()) {
-      <a routerLink="/members" routerLinkActive="text-accent" [routerLinkActiveOptions]="{exact: true}">
-        Matches
-      </a>
-      <a routerLink="/lists" routerLinkActive="text-accent">Lists</a>
-      <a routerLink="/messages" routerLinkActive="text-accent">Messages</a>
+        <a routerLink="/members" routerLinkActive="text-accent" [routerLinkActiveOptions]="{exact: true}">
+          Matches
+        </a>
+        <a routerLink="/lists" routerLinkActive="text-accent">Lists</a>
+        <a routerLink="/messages" routerLinkActive="text-accent">Messages</a>
       }
       <a routerLink="/errors" routerLinkActive="text-accent">Errors</a>
     </nav>
+
+    @if(busyService.busyRequestCount() > 0) {
+      <span class="loading loading-spinner text-accent"></span>
+    }
 
     <div class="flex align-middle ml-auto gap-3">
       <!-- Themes dropdown -->
@@ -39,7 +43,7 @@
           <span>{{ selectedTheme() }}</span>
 
         </button>
-        <ul tabindex="1" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+        <ul tabindex="1" class="dropdown-content z-50 menu bg-base-100 rounded-box w-52 p-2 shadow-sm">
           @for (theme of themes; track $index) {
             <li (click)="onThemeSelected(theme)">
               <a>{{theme}}</a>
@@ -49,24 +53,24 @@
       </div>
 
       @if(accountService.currentUser(); as user) {
-      <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="flex items-center text-white text-xl gap-3 cursor-pointer">
-          <img [src]="user?.imageUrl || '/user.png'" alt="user avatar" class="w-10 h-10 rounded-full" />
-          <span>{{ user.displayName }}</span>
+        <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="flex items-center text-white text-xl gap-3 cursor-pointer">
+            <img [src]="user?.imageUrl || '/user.png'" alt="user avatar" class="w-10 h-10 rounded-full" />
+            <span>{{ user.displayName }}</span>
+          </div>
+          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
+            <li><a routerLink="/members/{{user.id}}">Edit Profile</a></li>
+            <li><a (click)="loggedOut()">Logout</a></li>
+          </ul>
         </div>
-        <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm">
-          <li><a>Edit Profile</a></li>
-          <li><a (click)="loggedOut()">Logout</a></li>
-        </ul>
-      </div>
       } @else {
-      <form #loginForm="ngForm" (ngSubmit)="login()" class="flex items-center gap-3">
-        <input [(ngModel)]="loginVM.email" name="email" type="text" class="input" placeholder="Email">
+        <form #loginForm="ngForm" (ngSubmit)="login()" class="flex items-center gap-3">
+          <input [(ngModel)]="loginVM.email" name="email" type="text" class="input" placeholder="Email">
 
-        <input [(ngModel)]="loginVM.password" name="password" type="password" class="input" placeholder="Password">
+          <input [(ngModel)]="loginVM.password" name="password" type="password" class="input" placeholder="Password">
 
-        <button type="submit" class="btn">Login</button>
-      </form>
+          <button type="submit" class="btn">Login</button>
+        </form>
       }
     </div>
 

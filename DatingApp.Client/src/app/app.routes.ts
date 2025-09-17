@@ -14,6 +14,7 @@ import { MemberMessages } from '../features/members/member-messages/member-messa
 
 import { memberResolver } from '../features/members/member-resolver';
 import { authenticateGuard } from '../core/guards/authenticate-guard';
+import { preventUnsavedChangesGuard } from '../core/guards/prevent-unsaved-changes-guard';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -30,7 +31,7 @@ export const routes: Routes = [
         component: MemberDetailed,
         children: [
           { path: '', redirectTo: 'profile', pathMatch: 'full' },  /* redirect members/:id to profile */
-          { path: 'profile', component: MemberProfile, title: 'Profile' },
+          { path: 'profile', component: MemberProfile, title: 'Profile', canDeactivate: [preventUnsavedChangesGuard]},
           { path: 'photos', component: MemberPhotos, title: 'Photos' },
           { path: 'messages', component: MemberMessages, title: 'Messages' }
         ]

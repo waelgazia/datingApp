@@ -1,8 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
-import { Location } from '@angular/common';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 
-import { ApiError } from '../../../interfaces/ApiError';
+import { ApiError } from '../../../interfaces/base/ApiError';
 
 @Component({
   selector: 'app-server-error',

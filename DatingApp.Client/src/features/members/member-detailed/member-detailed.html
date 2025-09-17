@@ -1,4 +1,4 @@
-@if(member(); as member) {
+@if(this.memberService.member(); as member) {
   <div class="flex gap-6">
     <!-- Left Tab Info -->
     <div class="card bg-base-100 flex flex-col h-[85vh] w-1/4">
@@ -25,14 +25,23 @@
       </div>
 
       <div class="card-actions justify-between gap-2 px-2 mb-3">
-        <button class="btn btn-info flex-1">Go Back</button>
+        <button class="btn btn-info flex-1" (click)="goBack()">Go Back</button>
         <button class="btn btn-primary flex-1">Like User</button>
       </div>
     </div>
 
     <!-- Right Tab Info -->
     <div class="card bg-base-100 w-3/4 p-6">
-      <h3 class="card-title text-3xl text-primary">{{title()}}</h3>
+      <div class="flex justify-between items-center">
+        <h3 class="card-title text-3xl text-primary">{{title()}}</h3>
+        @if(isCurrentUser()) {
+          <button (click)="toggleEdit()"
+                  [ngClass]="editModeEnabled() ? 'btn-error' : 'btn-primary'"
+                  class="btn btn-outline">
+            {{ editModeEnabled() ? 'Cancel' : 'Edit' }}
+          </button>
+        }
+      </div>
       <div class="divider"></div>
       <div>
         <router-outlet />

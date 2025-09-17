@@ -1,6 +1,7 @@
-import { Component, inject, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RegisterVM } from '../../../interfaces/RegisterVM';
+import { Component, inject, output } from '@angular/core';
+
+import { RegisterVM } from '../../../interfaces/models/RegisterVM';
 import { AccountService } from '../../../core/services/account-service';
 
 @Component({
