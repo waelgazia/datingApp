@@ -14,10 +14,12 @@ namespace DatingApp.API.Controllers;
 public class MembersController : BaseApiController
 {
     private readonly IMemberRepository _memberRepository;
+    private readonly IPhotoService _photoService;
 
-    public MembersController(IMemberRepository memberRepository)
+    public MembersController(IMemberRepository memberRepository, IPhotoService photoService)
     {
         _memberRepository = memberRepository;
+        _photoService = photoService;
     }
 
     [HttpGet]
@@ -70,5 +72,94 @@ public class MembersController : BaseApiController
         }
 
         return NoContent();
+    }
+
+    [HttpPost("add-photo")]
+    public async Task<ActionResult<PhotoDto>> AddPhoto([FromForm] IFormFile file)
+    {
+        Member? member = await _memberRepository.GetMemberForUpdateAsync(User.GetMemberId());
+        if (member == null)
+        {
+            return BadRequest("Can not update member!");
+        }
+
+        var uploadResult = await _photoService.AddPhotoAsync(file);
+        if (uploadResult.Error != null)
+        {
+            return BadRequest(uploadResult.Error.Message);
+        }
+
+        Photo photo = new Photo
+        {
+            Url = uploadResult.SecureUrl.AbsoluteUri,
+            PublicId = uploadResult.PublicId,
+            MemberId = User.GetMemberId()
+        };
+
+        if (member.ImageUrl == null)
+        {
+            member.ImageUrl = photo.Url;
+            member.User.ImageUrl = photo.Url;
+        }
+
+        member.Photos.Add(photo);
+
+        if (await _memberRepository.SaveAllAsync())
+        {
+            return photo.ToPhotoDto();
+        }
+
+        return BadRequest("Problem adding photo");
+    }
+
+    [HttpPut("set-main-photo/{photoId}")]
+    public async Task<ActionResult> SetMainPhoto(int photoId)
+    {
+        Member? member = await _memberRepository.GetMemberForUpdateAsync(User.GetMemberId());
+        if (member == null)
+        {
+            return BadRequest("Can not get member from token!");
+        }
+
+        Photo? photo = member.Photos.SingleOrDefault(p => p.Id == photoId);
+        if (photo == null || photo.Url == member.ImageUrl)
+        {
+            return BadRequest("Can not set this as main photo!");
+        }
+
+        member.ImageUrl = photo.Url;
+        member.User.ImageUrl = photo.Url;
+
+        if (await _memberRepository.SaveAllAsync())
+        {
+            return NoContent();
+        }
+
+        return BadRequest("Problem setting main photo!");
+    }
+
+    [HttpDelete("delete-photo/{photoId}")]
+    public async Task<ActionResult> DeleteMemberPhoto(int photoId)
+    {
+        Member? member = await _memberRepository.GetMemberForUpdateAsync(User.GetMemberId());
+        if (member == null) return BadRequest("Can not get member from token!");
+
+        Photo? photo = member.Photos.SingleOrDefault(p => p.Id == photoId);
+        if (photo == null) return BadRequest("The member does not own the photo!");
+        if (photo.Url == member.ImageUrl) return BadRequest("Can not delete the main photo!");
+
+        if (photo.PublicId != null)
+        {
+            var result = await _photoService.DeletePhotoAsync(photo.PublicId);
+            if (result.Error != null) return BadRequest(result.Error.Message);
+        }
+
+        member.Photos.Remove(photo);
+        if (await _memberRepository.SaveAllAsync())
+        {
+            return NoContent();
+        }
+
+        return BadRequest("Problem deleting the photo!");
     }
 }
