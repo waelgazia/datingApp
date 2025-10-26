@@ -3,10 +3,10 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 
 import { Photo } from '../../../interfaces/models/Photo';
 import { Member } from '../../../interfaces/models/Member';
+import { StarButton } from "../../../shared/star-button/star-button";
 import { MemberService } from '../../../core/services/member-service';
 import { ImageUpload } from "../../../shared/image-upload/image-upload";
 import { AccountService } from '../../../core/services/account-service';
-import { StarButton } from "../../../shared/star-button/star-button";
 import { DeleteButton } from "../../../shared/delete-button/delete-button";
 
 @Component({
@@ -47,6 +47,9 @@ export class MemberPhotos implements OnInit {
         this.memberService.editMode.set(false);
         this.loading.set(false);
         this.photos.update(photos => [...photos, photo])
+        if (!this.memberService.member()?.imageUrl) {
+          this.setMainLocalPhoto(photo);
+        }
       },
       error: error => {
         console.log('Error uploading image', error);
@@ -58,19 +61,21 @@ export class MemberPhotos implements OnInit {
   setMainPhoto(photo: Photo) {
     this.memberService.setMainPhoto(photo).subscribe({
       next: () => {
-        const currentUser = this.accountService.currentUser();
-        if (currentUser)
-        {
-          currentUser.imageUrl = photo.url;
-          this.accountService.setCurrentUser(currentUser);
-        }
-
-        this.memberService.member.update(member => ({
-          ...member,
-          imageUrl: photo.url
-        }) as Member)
+        this.setMainLocalPhoto(photo);
       }
     })
+  }
+
+  private setMainLocalPhoto(photo: Photo) {
+    const currentUser = this.accountService.currentUser();
+    if (currentUser) {
+      currentUser.imageUrl = photo.url;
+      this.accountService.setCurrentUser(currentUser);
+    }
+    this.memberService.member.update(member => ({
+      ...member,
+      imageUrl: photo.url
+    }) as Member)
   }
 
   deletePhoto(photoId: number) {

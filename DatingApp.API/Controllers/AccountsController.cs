@@ -31,8 +31,17 @@ namespace DatingApp.API.Controllers
                 DisplayName = accountDto.DisplayName,
                 Email = accountDto.Email,
                 PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(accountDto.Password)),
-                PasswordSalt = hmac.Key
+                PasswordSalt = hmac.Key,
+                Member = new Member()
+                {
+                    DisplayName = accountDto.DisplayName,
+                    DateOfBirth = accountDto.DateOfBirth,
+                    Gender = accountDto.Gender,
+                    City = accountDto.City,
+                    Country = accountDto.Country
+                }
             };
+            newUser.Member.Id = newUser.Id;
 
             _dbContext.Users.Add(newUser);
             await _dbContext.SaveChangesAsync();
