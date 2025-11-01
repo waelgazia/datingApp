@@ -1,4 +1,4 @@
-namespace DatingApp.API.helper.cs;
+namespace DatingApp.API.helper;
 
 /// <summary>
 /// A class represents the CloudinarySettings in the appsettings.json file.

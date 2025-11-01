@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 
-using DatingApp.API.helper.cs;
+using DatingApp.API.helper;
 using DatingApp.API.Interfaces;
 
 namespace DatingApp.API.Services;
