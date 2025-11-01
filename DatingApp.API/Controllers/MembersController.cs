@@ -7,6 +7,7 @@ using DatingApp.API.Mapping;
 using DatingApp.API.Entities;
 using DatingApp.API.Interfaces;
 using DatingApp.API.Extensions;
+using DatingApp.API.ResourceParameters;
 
 namespace DatingApp.API.Controllers;
 
@@ -23,10 +24,13 @@ public class MembersController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<MemberDto>>> GetMembers()
+    public async Task<ActionResult<PagedList<MemberDto>>>
+        GetMembers([FromQuery] MembersResourceParameters resourceParameters)
     {
-        IReadOnlyList<Member> memberEntities = await _memberRepository.GetMembersAsync();
-        return Ok(memberEntities.ToMembersDto());
+        PagedList<Member> paginatedMembers = await _memberRepository.GetMembersAsync(resourceParameters);
+        AddPaginationHeader(paginatedMembers);
+
+        return Ok(paginatedMembers.ToMembersDto());
     }
 
     [HttpGet("{id}")]

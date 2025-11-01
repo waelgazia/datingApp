@@ -1,14 +1,14 @@
-import { Observable } from 'rxjs';
-import { AsyncPipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 
-import { Member } from '../../../interfaces/models/Member';
 import { MemberCard } from '../member-card/member-card';
+import { Member } from '../../../interfaces/models/Member';
+import { Paginator } from "../../../shared/paginator/paginator";
 import { MemberService } from '../../../core/services/member-service';
+import { PaginatedResult } from '../../../interfaces/base/PaginatedResult';
 
 @Component({
   selector: 'app-member-list',
-  imports: [ AsyncPipe, MemberCard ],
+  imports: [MemberCard, Paginator],
   templateUrl: './member-list.html',
   styleUrl: './member-list.css'
 })
@@ -18,12 +18,25 @@ import { MemberService } from '../../../core/services/member-service';
   - AsyncPipe handle the observable subscription, and when the component is disposed, it's going to
     automatically unsubscribe as well (this is not required for HttpClient, it is self disposable).
  */
-
-export class MemberList {
+export class MemberList implements OnInit {
   private memberService = inject(MemberService);
-  protected members$: Observable<Member[]>;
+  protected paginatedMembers = signal<PaginatedResult<Member> | null>(null);
+  pageNumber = 1;
+  pageSize = 5;
 
-  constructor() {
-    this.members$ = this.memberService.getMembers();
+  ngOnInit(): void {
+    this.loadMembers();
+  }
+
+  loadMembers() {
+    this.memberService.getMembers(this.pageNumber, this.pageSize).subscribe({
+      next: result => this.paginatedMembers.set(result)
+    });
+  }
+
+  onPageChanged(event: { pageNumber: number, pageSize: number }) {
+    this.pageNumber = event.pageNumber;
+    this.pageSize = event.pageSize;
+    this.loadMembers();
   }
 }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 using DatingApp.API.Data;
 using DatingApp.API.helper;
+using DatingApp.API.Globals;
 using DatingApp.API.Services;
 using DatingApp.API.Interfaces;
 using DatingApp.API.Middlewares;
@@ -43,8 +44,12 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseMiddleware<ExceptionMiddleware>();
 
-app.UseCors(corsPolicy => corsPolicy.AllowAnyHeader().AllowAnyMethod()
-    .WithOrigins("http://localhost:4200", "https://localhost:4200"));
+app.UseCors(corsPolicy => corsPolicy
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .WithOrigins("http://localhost:4200", "https://localhost:4200")
+    .WithExposedHeaders([HeaderNames.Pagination])
+);
 
 app.UseAuthentication();
 app.UseAuthorization();

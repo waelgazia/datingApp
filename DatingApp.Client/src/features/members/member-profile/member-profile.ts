@@ -5,8 +5,8 @@ import { Component, computed, HostListener, inject, OnDestroy, OnInit, ViewChild
 import { Member } from '../../../interfaces/models/Member';
 import { ToastService } from '../../../core/services/toast-service';
 import { MemberService } from '../../../core/services/member-service';
-import { EditableMember } from '../../../interfaces/models/editableMember';
 import { AccountService } from '../../../core/services/account-service';
+import { EditableMember } from '../../../interfaces/models/EditableMember';
 
 @Component({
   selector: 'app-member-profile',

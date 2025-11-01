@@ -1,11 +1,12 @@
-import { Observable, tap } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { Observable, tap, map } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 
 import { Photo } from '../../interfaces/models/Photo';
 import { Member } from '../../interfaces/models/Member';
 import { environment } from '../../environments/environment';
-import { EditableMember } from '../../interfaces/models/editableMember';
+import { EditableMember } from '../../interfaces/models/EditableMember';
+import { PaginatedResult, PaginationMetadata } from '../../interfaces/base/PaginatedResult';
 
 @Injectable({
   providedIn: 'root'
@@ -16,8 +17,30 @@ export class MemberService {
   member = signal<Member | null>(null);
   editMode = signal<boolean>(false);
 
-  getMembers(): Observable<Member[]> {
-    return this._httpClient.get<Member[]>(this._baseUrl + 'members');
+  getMembers(pageNumber = 1, pageSize = 5): Observable<PaginatedResult<Member>> {
+    const queryParameters = new HttpParams()
+      .set('pageNumber', pageNumber)
+      .set('pageSize', pageSize);
+
+    return this._httpClient
+      .get<Member[]>(this._baseUrl + 'members', {
+        params: queryParameters,
+        observe: 'response'
+      })
+      .pipe(
+        map(res => {
+          const members = res.body ?? [];
+          const paginationHeader = res.headers.get('X-Pagination');
+          const paginationMetadata = paginationHeader
+            ? JSON.parse(paginationHeader) as PaginationMetadata
+            : {} as PaginationMetadata;
+
+          return {
+            items: members,
+            paginationMetadata
+          };
+        })
+      );
   }
 
   getMember(id: string): Observable<Member> {

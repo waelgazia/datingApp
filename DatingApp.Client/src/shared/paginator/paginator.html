@@ -1,0 +1,30 @@
+@if(paginationData(); as data) {
+  <div class="flex items-center w-full gap-3 py-3">
+    <span>Items per page:</span>
+    <select class="select w-24" (change)="onPageChanged(undefined, $event.target)">
+      @for (size of pageSizeOptions(); track $index) {
+        <option [value]="size" [selected]="size === data.pageSize">{{size}}</option>
+      }
+    </select>
+
+    <div class="text-sm">
+      {{ (data.pageNumber - 1) * data.pageSize + 1 }} - {{ lastItemIndex() }} of {{ data.totalCount }}
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button class="btn btn-circle btn-ghost"
+              [disabled]="!data.hasPrevious"
+              (click)="onPageChanged(data.pageNumber - 1)">
+        &larr;
+      </button>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button class="btn btn-circle btn-ghost"
+              [disabled]="!data.hasNext"
+              (click)="onPageChanged(data.pageNumber + 1)">
+        &rarr;
+      </button>
+    </div>
+  </div>
+}

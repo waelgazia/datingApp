@@ -9,12 +9,15 @@ const cache = new Map<string, HttpEvent<unknown>>();
 export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   const busyService = inject(BusyService);
 
+  // CURRENTLY, WE DON'T ACCOUNT FOR QUERY PARAMETERS WHEN CASHING
+  /*
   if (req.method === 'GET') {
     const cachedResponse = cache.get(req.url);
     if (cachedResponse) {
       return of(cachedResponse);
     }
   }
+  */
 
   busyService.busy();
 
