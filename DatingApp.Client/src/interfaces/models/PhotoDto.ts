@@ -1,4 +1,4 @@
-export interface Photo {
+export interface PhotoDto {
   id: number,
   url: string,
   publicId?: string,

@@ -3,7 +3,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { themes } from '../theme';
-import { LoginVM } from '../../interfaces/models/LoginVM';
+import { LoginDto } from '../../interfaces/models/LoginDto';
 import { BusyService } from '../../core/services/busy-service';
 import { ToastService } from '../../core/services/toast-service';
 import { AccountService } from '../../core/services/account-service';
@@ -20,7 +20,7 @@ export class Nav implements OnInit{
 
   protected busyService = inject(BusyService);
   protected accountService = inject(AccountService);
-  protected loginVM = {} as LoginVM;
+  protected loginDto = {} as LoginDto;
 
   protected selectedTheme = signal<string>(localStorage.getItem('theme') || 'light');
   protected themes : string[] = themes;
@@ -31,10 +31,10 @@ export class Nav implements OnInit{
   }
 
   login() {
-    this.accountService.login(this.loginVM)
+    this.accountService.login(this.loginDto)
       .subscribe({
         next: () => {
-          this.loginVM = {} as LoginVM;
+          this.loginDto = {} as LoginDto;
           this._router.navigateByUrl('/members');
           this._toastService.success('Logged in successfully!');
         },

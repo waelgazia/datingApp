@@ -3,9 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 import { environment } from '../../environments/environment';
 
-import { User } from '../../interfaces/models/User';
-import { LoginVM } from '../../interfaces/models/LoginVM';
-import { RegisterVM } from '../../interfaces/models/RegisterVM';
+import { UserDto } from '../../interfaces/models/UserDto';
+import { LoginDto } from '../../interfaces/models/LoginDto';
+import { RegisterDto } from '../../interfaces/models/RegisterDto';
 
 @Injectable({
   providedIn: 'root'
@@ -14,10 +14,10 @@ export class AccountService {
   private _httpClient = inject(HttpClient);
   private _baseUrl : string = environment.apiUrl;
 
-  currentUser = signal<User | null>(null);
+  currentUser = signal<UserDto | null>(null);
 
-  login(loginVM: LoginVM) {
-    return this._httpClient.post<User>(this._baseUrl + 'accounts/login', loginVM).pipe(
+  login(loginDto: LoginDto) {
+    return this._httpClient.post<UserDto>(this._baseUrl + 'accounts/login', loginDto).pipe(
       tap(user => {
         if (user) {
           this.setCurrentUser(user);
@@ -31,8 +31,8 @@ export class AccountService {
     this.currentUser.set(null);
   }
 
-  register(registerVM: RegisterVM) {
-    return this._httpClient.post<User>(this._baseUrl + 'accounts/register', registerVM).pipe(
+  register(registerDto: RegisterDto) {
+    return this._httpClient.post<UserDto>(this._baseUrl + 'accounts/register', registerDto).pipe(
       tap(user => {
         if (user) {
           this.setCurrentUser(user);
@@ -41,7 +41,7 @@ export class AccountService {
     );
   }
 
-  setCurrentUser(user: User) {
+  setCurrentUser(user: UserDto) {
     localStorage.setItem('user', JSON.stringify(user));
     this.currentUser.set(user);
   }

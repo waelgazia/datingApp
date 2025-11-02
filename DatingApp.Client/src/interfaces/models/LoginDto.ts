@@ -1,4 +1,4 @@
-export interface LoginVM {
+export interface LoginDto {
   email: string,
   password: string
 }

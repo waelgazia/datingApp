@@ -1,8 +1,8 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 
 import { MemberCard } from '../member-card/member-card';
-import { Member } from '../../../interfaces/models/Member';
 import { Paginator } from "../../../shared/paginator/paginator";
+import { MemberDto } from '../../../interfaces/models/MemberDto';
 import { MemberService } from '../../../core/services/member-service';
 import { PaginatedResult } from '../../../interfaces/base/PaginatedResult';
 
@@ -20,7 +20,7 @@ import { PaginatedResult } from '../../../interfaces/base/PaginatedResult';
  */
 export class MemberList implements OnInit {
   private memberService = inject(MemberService);
-  protected paginatedMembers = signal<PaginatedResult<Member> | null>(null);
+  protected paginatedMembers = signal<PaginatedResult<MemberDto> | null>(null);
   pageNumber = 1;
   pageSize = 5;
 

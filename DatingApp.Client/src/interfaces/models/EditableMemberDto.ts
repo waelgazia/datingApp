@@ -1,4 +1,4 @@
-export interface EditableMember {
+export interface EditableMemberDto {
   displayName: string;
   description?: string;
   city: string;

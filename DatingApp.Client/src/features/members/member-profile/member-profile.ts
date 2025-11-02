@@ -2,11 +2,11 @@ import { DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Component, computed, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
-import { Member } from '../../../interfaces/models/Member';
+import { MemberDto } from '../../../interfaces/models/MemberDto';
 import { ToastService } from '../../../core/services/toast-service';
 import { MemberService } from '../../../core/services/member-service';
 import { AccountService } from '../../../core/services/account-service';
-import { EditableMember } from '../../../interfaces/models/EditableMember';
+import { EditableMemberDto } from '../../../interfaces/models/EditableMemberDto';
 
 @Component({
   selector: 'app-member-profile',
@@ -30,7 +30,7 @@ export class MemberProfile implements OnInit, OnDestroy {
   private _toastService = inject(ToastService);
 
   protected editModeEnabled = computed(() => this.memberService.editMode());
-  protected editableMember : EditableMember = {
+  protected editableMember : EditableMemberDto = {
     displayName: '',
     description: '',
     city: '',
@@ -62,7 +62,7 @@ export class MemberProfile implements OnInit, OnDestroy {
 
         this._toastService.success('Profile updated successfully');
         this.memberService.editMode.set(false);
-        this.memberService.member.set(updatedMember as Member);
+        this.memberService.member.set(updatedMember as MemberDto);
 
         // reset the form to update its state by calling reset (this updates the dirty flag to false)
         // so then our can deactivate guard won't interrupt moving around to different component.

@@ -1,4 +1,4 @@
-export interface Member {
+export interface MemberDto {
   id: string
   dateOfBirth: string
   imageUrl?: string

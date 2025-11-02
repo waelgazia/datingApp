@@ -1,8 +1,8 @@
 import { ActivatedRoute } from '@angular/router';
 import { Component, inject, OnInit, signal } from '@angular/core';
 
-import { Photo } from '../../../interfaces/models/Photo';
-import { Member } from '../../../interfaces/models/Member';
+import { PhotoDto } from '../../../interfaces/models/PhotoDto';
+import { MemberDto } from '../../../interfaces/models/MemberDto';
 import { StarButton } from "../../../shared/star-button/star-button";
 import { MemberService } from '../../../core/services/member-service';
 import { ImageUpload } from "../../../shared/image-upload/image-upload";
@@ -19,7 +19,7 @@ export class MemberPhotos implements OnInit {
   private _route = inject(ActivatedRoute);
   protected accountService = inject(AccountService);
   protected memberService = inject(MemberService);
-  protected photos = signal<Photo[]>([]);
+  protected photos = signal<PhotoDto[]>([]);
   protected loading = signal<boolean>(false)
 
   ngOnInit(): void {
@@ -58,7 +58,7 @@ export class MemberPhotos implements OnInit {
     })
   }
 
-  setMainPhoto(photo: Photo) {
+  setMainPhoto(photo: PhotoDto) {
     this.memberService.setMainPhoto(photo).subscribe({
       next: () => {
         this.setMainLocalPhoto(photo);
@@ -66,7 +66,7 @@ export class MemberPhotos implements OnInit {
     })
   }
 
-  private setMainLocalPhoto(photo: Photo) {
+  private setMainLocalPhoto(photo: PhotoDto) {
     const currentUser = this.accountService.currentUser();
     if (currentUser) {
       currentUser.imageUrl = photo.url;
@@ -75,7 +75,7 @@ export class MemberPhotos implements OnInit {
     this.memberService.member.update(member => ({
       ...member,
       imageUrl: photo.url
-    }) as Member)
+    }) as MemberDto)
   }
 
   deletePhoto(photoId: number) {

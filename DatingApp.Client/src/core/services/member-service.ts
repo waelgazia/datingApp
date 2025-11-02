@@ -2,10 +2,10 @@ import { Observable, tap, map } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 
-import { Photo } from '../../interfaces/models/Photo';
-import { Member } from '../../interfaces/models/Member';
+import { PhotoDto } from '../../interfaces/models/PhotoDto';
+import { MemberDto } from '../../interfaces/models/MemberDto';
 import { environment } from '../../environments/environment';
-import { EditableMember } from '../../interfaces/models/EditableMember';
+import { EditableMemberDto } from '../../interfaces/models/EditableMemberDto';
 import { PaginatedResult, PaginationMetadata } from '../../interfaces/base/PaginatedResult';
 
 @Injectable({
@@ -14,16 +14,16 @@ import { PaginatedResult, PaginationMetadata } from '../../interfaces/base/Pagin
 export class MemberService {
   private _httpClient = inject(HttpClient);
   private _baseUrl : string = environment.apiUrl;
-  member = signal<Member | null>(null);
+  member = signal<MemberDto | null>(null);
   editMode = signal<boolean>(false);
 
-  getMembers(pageNumber = 1, pageSize = 5): Observable<PaginatedResult<Member>> {
+  getMembers(pageNumber = 1, pageSize = 5): Observable<PaginatedResult<MemberDto>> {
     const queryParameters = new HttpParams()
       .set('pageNumber', pageNumber)
       .set('pageSize', pageSize);
 
     return this._httpClient
-      .get<Member[]>(this._baseUrl + 'members', {
+      .get<MemberDto[]>(this._baseUrl + 'members', {
         params: queryParameters,
         observe: 'response'
       })
@@ -43,19 +43,19 @@ export class MemberService {
       );
   }
 
-  getMember(id: string): Observable<Member> {
-    return this._httpClient.get<Member>(this._baseUrl + `members/${id}`).pipe(
+  getMember(id: string): Observable<MemberDto> {
+    return this._httpClient.get<MemberDto>(this._baseUrl + `members/${id}`).pipe(
         tap(member => {
           this.member.set(member)
         })
       );
   }
 
-  getMemberPhotos(id: string): Observable<Photo[]> {
-    return this._httpClient.get<Photo[]>(this._baseUrl + `members/${id}/photos`)
+  getMemberPhotos(id: string): Observable<PhotoDto[]> {
+    return this._httpClient.get<PhotoDto[]>(this._baseUrl + `members/${id}/photos`)
   }
 
-  updateMember(member: EditableMember) {
+  updateMember(member: EditableMemberDto) {
     return this._httpClient.put(this._baseUrl + 'members', member);
   }
 
@@ -63,10 +63,10 @@ export class MemberService {
     const formData = new FormData();
     formData.append('file', file);
 
-    return this._httpClient.post<Photo>(this._baseUrl + `members/add-photo`, formData);
+    return this._httpClient.post<PhotoDto>(this._baseUrl + `members/add-photo`, formData);
   }
 
-  setMainPhoto(photo: Photo) {
+  setMainPhoto(photo: PhotoDto) {
     return this._httpClient.put(this._baseUrl + `members/set-main-photo/${photo.id}`, {});
   }
 

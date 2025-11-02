@@ -1,8 +1,8 @@
 import { RouterLink } from '@angular/router';
 import { Component, input } from '@angular/core';
 
-import { Member } from '../../../interfaces/models/Member';
 import { AgePipe } from '../../../core/pipes/age-pipe';
+import { MemberDto } from '../../../interfaces/models/MemberDto';
 
 @Component({
   selector: 'app-member-card',
@@ -11,5 +11,5 @@ import { AgePipe } from '../../../core/pipes/age-pipe';
   styleUrl: './member-card.css'
 })
 export class MemberCard {
-  member = input.required<Member>();
+  member = input.required<MemberDto>();
 }
