@@ -7,6 +7,7 @@ import { LoginDto } from '../../interfaces/models/LoginDto';
 import { BusyService } from '../../core/services/busy-service';
 import { ToastService } from '../../core/services/toast-service';
 import { AccountService } from '../../core/services/account-service';
+import { STORAGE_KEY } from '../../constants/storage-keys';
 
 @Component({
   selector: 'app-nav',
@@ -22,7 +23,7 @@ export class Nav implements OnInit{
   protected accountService = inject(AccountService);
   protected loginDto = {} as LoginDto;
 
-  protected selectedTheme = signal<string>(localStorage.getItem('theme') || 'light');
+  protected selectedTheme = signal<string>(localStorage.getItem(STORAGE_KEY.THEME) || 'light');
   protected themes : string[] = themes;
 
   ngOnInit(): void {
@@ -52,7 +53,7 @@ export class Nav implements OnInit{
 
   onThemeSelected(theme: string) {
     this.selectedTheme.set(theme);
-    localStorage.setItem('theme', theme);
+    localStorage.setItem(STORAGE_KEY.THEME, theme);
 
     // to set a theme using daisyUI
     document.documentElement.setAttribute('data-theme', theme);

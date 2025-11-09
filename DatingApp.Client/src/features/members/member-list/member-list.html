@@ -1,14 +1,33 @@
 @if (paginatedMembers(); as paginatedMembers) {
-  @if (paginatedMembers.paginationMetadata; as metadata) {
-    <app-paginator [paginationData]="metadata"
-                   (pageChanged)="onPageChanged($event)"/>
-  }
+  <div class="flex flex-col w-full">
+    <div class="flex justify-between items-center">
+      <div class="flex gap-3">
+        <button (click)="openFilterModal()" class="btn btn-primary">Select Filters</button>
+        <button (click)="resetFilterModal()" class="btn btn-neutral">Reset Filters</button>
+      </div>
 
-  @if(paginatedMembers.items; as members) {
-    <div class="grid grid-cols-5 gap-6">
-      @for(member of members; track member.id) {
-        <app-member-card [member]="member" />
+      @if (paginatedMembers.paginationMetadata; as metadata) {
+        <app-paginator [paginationData]="metadata"
+                       (pageChanged)="onPageChanged($event)"/>
       }
     </div>
-  }
+
+    <div class="w-auto font-semibold py-2 text-secondary capitalize">
+      {{ filterDisplayMessage }}
+    </div>
+
+    @if(paginatedMembers.items; as members) {
+      <div class="grid grid-cols-5 gap-6 mt-3">
+        @for(member of members; track member.id) {
+          <app-member-card [member]="member" />
+        }
+      </div>
+    }
+  </div>
 }
+
+<app-filter-modal #filterModal
+                  [hidden]="!paginatedMembers()"
+                  (modalClosed)="closeFilterModal()"
+                  (dataSubmitted)="onFilterModalSubmitted($event)"
+                  [membersParameters]="membersParameters" />

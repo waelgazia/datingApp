@@ -4,7 +4,7 @@ using DatingApp.API.ResourceParameters;
 
 namespace DatingApp.API.Interfaces;
 
-public interface IMemberRepository
+public interface IMembersRepository
 {
     Task<PagedList<Member>> GetMembersAsync(MembersResourceParameters membersResourceParameters);
     Task<Member?> GetMemberByIdAsync(string id);

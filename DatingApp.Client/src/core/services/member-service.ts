@@ -2,10 +2,12 @@ import { Observable, tap, map } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 
+import { STORAGE_KEY } from '../../constants/storage-keys';
 import { PhotoDto } from '../../interfaces/models/PhotoDto';
-import { MemberDto } from '../../interfaces/models/MemberDto';
 import { environment } from '../../environments/environment';
+import { MemberDto } from '../../interfaces/models/MemberDto';
 import { EditableMemberDto } from '../../interfaces/models/EditableMemberDto';
+import { MembersParameters } from '../../interfaces/ResourceParameters/MembersParameters';
 import { PaginatedResult, PaginationMetadata } from '../../interfaces/base/PaginatedResult';
 
 @Injectable({
@@ -17,10 +19,17 @@ export class MemberService {
   member = signal<MemberDto | null>(null);
   editMode = signal<boolean>(false);
 
-  getMembers(pageNumber = 1, pageSize = 5): Observable<PaginatedResult<MemberDto>> {
-    const queryParameters = new HttpParams()
-      .set('pageNumber', pageNumber)
-      .set('pageSize', pageSize);
+  getMembers(membersParameters: MembersParameters): Observable<PaginatedResult<MemberDto>> {
+    let queryParameters = new HttpParams()
+      .set('pageNumber', membersParameters.pageNumber)
+      .set('pageSize', membersParameters.pageSize)
+      .set('minAge', membersParameters.minAge)
+      .set('maxAge', membersParameters.maxAge)
+      .set('orderBy', membersParameters.orderBy);
+
+    if (membersParameters.gender) {
+      queryParameters = queryParameters.append('gender', membersParameters.gender);
+    }
 
     return this._httpClient
       .get<MemberDto[]>(this._baseUrl + 'members', {
@@ -39,6 +48,9 @@ export class MemberService {
             items: members,
             paginationMetadata
           };
+        }),
+        tap(() => {
+          localStorage.setItem(STORAGE_KEY.FILTERS, JSON.stringify(membersParameters));
         })
       );
   }

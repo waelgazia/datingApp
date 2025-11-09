@@ -14,10 +14,10 @@ namespace DatingApp.API.Controllers;
 [Authorize]
 public class MembersController : BaseApiController
 {
-    private readonly IMemberRepository _memberRepository;
+    private readonly IMembersRepository _memberRepository;
     private readonly IPhotoService _photoService;
 
-    public MembersController(IMemberRepository memberRepository, IPhotoService photoService)
+    public MembersController(IMembersRepository memberRepository, IPhotoService photoService)
     {
         _memberRepository = memberRepository;
         _photoService = photoService;
@@ -27,9 +27,10 @@ public class MembersController : BaseApiController
     public async Task<ActionResult<PagedList<MemberDto>>>
         GetMembers([FromQuery] MembersResourceParameters resourceParameters)
     {
+        resourceParameters.CurrentMemberId = User.GetMemberId();
         PagedList<Member> paginatedMembers = await _memberRepository.GetMembersAsync(resourceParameters);
-        AddPaginationHeader(paginatedMembers);
 
+        AddPaginationHeader(paginatedMembers);
         return Ok(paginatedMembers.ToMembersDto());
     }
 

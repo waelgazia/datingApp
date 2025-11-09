@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Component, computed, HostListener, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
+import { TimeAgoPipe } from '../../../core/pipes/time-ago-pipe';
 import { MemberDto } from '../../../interfaces/models/MemberDto';
 import { ToastService } from '../../../core/services/toast-service';
 import { MemberService } from '../../../core/services/member-service';
@@ -10,7 +11,7 @@ import { EditableMemberDto } from '../../../interfaces/models/EditableMemberDto'
 
 @Component({
   selector: 'app-member-profile',
-  imports: [ DatePipe, FormsModule ],
+  imports: [ DatePipe, TimeAgoPipe, FormsModule ],
   templateUrl: './member-profile.html',
   styleUrl: './member-profile.css'
 })

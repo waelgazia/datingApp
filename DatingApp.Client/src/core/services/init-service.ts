@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
 import { AccountService } from './account-service';
+import { STORAGE_KEY } from '../../constants/storage-keys';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class InitService {
   // this method will run before Angular load any components.
   // for this to work, we need to return an observable
   init() : Observable<null> {
-    const userString = localStorage.getItem('user');
+    const userString = localStorage.getItem(STORAGE_KEY.USER);
     if (!userString) {
       return of(null);
     }

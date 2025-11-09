@@ -1,12 +1,14 @@
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 
+using DatingApp.API.helper;
 using DatingApp.API.Globals;
 
 namespace DatingApp.API.Base
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
+    [ServiceFilter(typeof(LogUserActivity))]
     public class BaseApiController : ControllerBase
     {
         /// <summary>

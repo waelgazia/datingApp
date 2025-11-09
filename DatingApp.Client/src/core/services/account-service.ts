@@ -1,10 +1,11 @@
 import { tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { environment } from '../../environments/environment';
 
 import { UserDto } from '../../interfaces/models/UserDto';
+import { STORAGE_KEY } from '../../constants/storage-keys';
 import { LoginDto } from '../../interfaces/models/LoginDto';
+import { environment } from '../../environments/environment';
 import { RegisterDto } from '../../interfaces/models/RegisterDto';
 
 @Injectable({
@@ -27,7 +28,8 @@ export class AccountService {
   }
 
   logout() {
-    localStorage.removeItem('user');
+    localStorage.removeItem(STORAGE_KEY.USER);
+    localStorage.removeItem(STORAGE_KEY.FILTERS);
     this.currentUser.set(null);
   }
 
@@ -42,7 +44,7 @@ export class AccountService {
   }
 
   setCurrentUser(user: UserDto) {
-    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(user));
     this.currentUser.set(user);
   }
 }
