@@ -1,14 +1,15 @@
 import { Observable, tap, map } from 'rxjs';
-import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
+import { HttpUtils } from './http-utils';
 import { STORAGE_KEY } from '../../constants/storage-keys';
 import { PhotoDto } from '../../interfaces/models/PhotoDto';
 import { environment } from '../../environments/environment';
 import { MemberDto } from '../../interfaces/models/MemberDto';
+import { PaginatedResult } from '../../interfaces/base/PaginatedResult';
 import { EditableMemberDto } from '../../interfaces/models/EditableMemberDto';
 import { MembersParameters } from '../../interfaces/ResourceParameters/MembersParameters';
-import { PaginatedResult, PaginationMetadata } from '../../interfaces/base/PaginatedResult';
 
 @Injectable({
   providedIn: 'root'
@@ -37,18 +38,7 @@ export class MemberService {
         observe: 'response'
       })
       .pipe(
-        map(res => {
-          const members = res.body ?? [];
-          const paginationHeader = res.headers.get('X-Pagination');
-          const paginationMetadata = paginationHeader
-            ? JSON.parse(paginationHeader) as PaginationMetadata
-            : {} as PaginationMetadata;
-
-          return {
-            items: members,
-            paginationMetadata
-          };
-        }),
+        map(res => HttpUtils.GetPaginatedResult<MemberDto>(res)),
         tap(() => {
           localStorage.setItem(STORAGE_KEY.FILTERS, JSON.stringify(membersParameters));
         })

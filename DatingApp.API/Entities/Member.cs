@@ -16,4 +16,6 @@ public class Member
     // navigation property
     public AppUser User { get; set; } = null!;
     public List<Photo> Photos { get; set; } = [];
+    public List<MemberLike> LikedMembers { get; set; } = [];
+    public List<MemberLike> LikedByMembers { get; set; } = [];
 }

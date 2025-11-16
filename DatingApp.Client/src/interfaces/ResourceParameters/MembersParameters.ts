@@ -1,8 +1,8 @@
-export class MembersParameters {
+import { ResourceBase } from "../base/ResourceBase";
+
+export class MembersParameters extends ResourceBase {
   gender?: string;
   minAge = 18;
   maxAge = 100;
-  pageNumber = 1;
-  pageSize = 10;
   orderBy = 'lastActive';
 }

@@ -1,6 +1,7 @@
-import { inject, Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
 
+import { LikesService } from './likes-service';
 import { AccountService } from './account-service';
 import { STORAGE_KEY } from '../../constants/storage-keys';
 
@@ -9,6 +10,7 @@ import { STORAGE_KEY } from '../../constants/storage-keys';
 })
 export class InitService {
   private _accountService = inject(AccountService);
+  private _likesService = inject(LikesService);
 
   // this method will run before Angular load any components.
   // for this to work, we need to return an observable
@@ -20,6 +22,7 @@ export class InitService {
 
     const user = JSON.parse(userString);
     this._accountService.currentUser.set(user);
+    this._likesService.getLikeIds();
 
     return of(null);   /* it used to be ObservableOf() */
   }

@@ -1,8 +1,9 @@
 import { RouterLink } from '@angular/router';
-import { Component, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 
 import { AgePipe } from '../../../core/pipes/age-pipe';
 import { MemberDto } from '../../../interfaces/models/MemberDto';
+import { LikesService } from '../../../core/services/likes-service';
 
 @Component({
   selector: 'app-member-card',
@@ -11,5 +12,24 @@ import { MemberDto } from '../../../interfaces/models/MemberDto';
   styleUrl: './member-card.css'
 })
 export class MemberCard {
+  private _likesService = inject(LikesService);
+
+  // determine if the current user has liked this member
+  protected hasLiked = computed(() => this._likesService.userLikeIds().includes(this.member().id));
   member = input.required<MemberDto>();
+
+  toggleLike(event: Event) {
+    // stop navigation to the member detail when click on the card
+    event.stopPropagation();
+
+    this._likesService.toggleLike(this.member().id).subscribe({
+      next: () => {
+        if (this.hasLiked()) {
+          this._likesService.userLikeIds.update(ids => ids.filter(x => x !== this.member().id))
+        } else {
+          this._likesService.userLikeIds.update(ids => ([...ids, this.member().id]));
+        }
+      }
+    })
+  }
 }
