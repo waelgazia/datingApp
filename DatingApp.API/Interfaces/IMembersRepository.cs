@@ -6,7 +6,7 @@ namespace DatingApp.API.Interfaces;
 
 public interface IMembersRepository
 {
-    Task<PagedList<Member>> GetMembersAsync(MembersResourceParameters membersResourceParameters);
+    Task<PagedList<Member>> GetMembersAsync(MembersParameters membersParameters);
     Task<Member?> GetMemberByIdAsync(string id);
     Task<Member?> GetMemberForUpdateAsync(string id);
     Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId);

@@ -5,6 +5,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { HttpUtils } from './http-utils';
 import { environment } from '../../environments/environment';
 import { MemberDto } from '../../interfaces/models/MemberDto';
+import { QUERY_PARAMETERS } from '../../constants/query-parameters';
 import { PaginatedResult } from '../../interfaces/base/PaginatedResult';
 import { LikesParameters } from '../../interfaces/ResourceParameters/LikesParameters';
 
@@ -23,8 +24,8 @@ export class LikesService {
 
   getLikes(likesParameters: LikesParameters): Observable<PaginatedResult<MemberDto>> {
     let queryParameters = new HttpParams()
-      .set('pageNumber', likesParameters.pageNumber)
-      .set('pageSize', likesParameters.pageSize)
+      .set(QUERY_PARAMETERS.PAGE_NUMBER, likesParameters.pageNumber)
+      .set(QUERY_PARAMETERS.PAGE_SIZE, likesParameters.pageSize)
       .set('predicate', likesParameters.predicate);
 
     return this._httpClient

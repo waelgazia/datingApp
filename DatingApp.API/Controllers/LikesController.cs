@@ -26,12 +26,11 @@ public class LikesController : BaseApiController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IReadOnlyList<MemberDto>>>
-        GetMemberLikes([FromQuery] LikesResourceParameters likesResourceParameters)
+    public async Task<ActionResult<PagedList<MemberDto>>>
+        GetMemberLikes([FromQuery] LikesParameters likesParameters)
     {
-        likesResourceParameters.MemberId = User.GetMemberId();
-        PagedList<Member> paginatedMembers = await _likesRepository
-            .GetMemberLikesAsync(likesResourceParameters);
+        likesParameters.MemberId = User.GetMemberId();
+        PagedList<Member> paginatedMembers = await _likesRepository.GetMemberLikesAsync(likesParameters);
 
         AddPaginationHeader(paginatedMembers);
         return Ok(paginatedMembers.ToMembersDto());

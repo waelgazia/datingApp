@@ -3,7 +3,8 @@
     <div class="flex justify-between items-center">
       <div class="tabs tabs-box tabs-lg text-primary w-fit">
         @for (tab of tabs; track $index) {
-          <button role="tab" class="tab" [class.tab-active]="likesParameters.predicate === tab.value"
+          <button role="tab" class="tab"
+            [class.tab-active]="likesParameters.predicate === tab.value"
             (click)="setPredicate(tab.value)">
             {{ tab.label }}
           </button>

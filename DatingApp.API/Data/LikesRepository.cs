@@ -15,30 +15,30 @@ public class LikesRepository(AppDbContext _dbContext) : ILikesRepository
     }
 
     public async Task<PagedList<Member>>
-        GetMemberLikesAsync(LikesResourceParameters resourceParameters)
+        GetMemberLikesAsync(LikesParameters likesParameters)
     {
         IQueryable<MemberLike> likesQuery = _dbContext.MemberLikes.AsQueryable();
         IQueryable<Member> membersQuery;
 
-        switch (resourceParameters.Predicate)
+        switch (likesParameters.Predicate)
         {
             case LikePredicate.LIKED:
                 membersQuery = likesQuery
-                    .Where(like => like.SourceMemberId == resourceParameters.MemberId)
+                    .Where(like => like.SourceMemberId == likesParameters.MemberId)
                     .Select(like => like.TargetMember);
                 break;
 
             case LikePredicate.LIKED_BY:
                 membersQuery = likesQuery
-                    .Where(like => like.TargetMemberId == resourceParameters.MemberId)
+                    .Where(like => like.TargetMemberId == likesParameters.MemberId)
                     .Select(like => like.SourceMember).AsQueryable();
                 break;
 
             default: // LikePredicate.MUTUAL (members that like the memberId and the other way around)
-                IReadOnlyList<string> likeIds = await GetCurrentMemberLikeIdsAsync(resourceParameters.MemberId);
+                IReadOnlyList<string> likeIds = await GetCurrentMemberLikeIdsAsync(likesParameters.MemberId);
 
                 membersQuery = likesQuery
-                    .Where(like => like.TargetMemberId == resourceParameters.MemberId
+                    .Where(like => like.TargetMemberId == likesParameters.MemberId
                         && likeIds.Contains(like.SourceMemberId))
                     .Select(like => like.SourceMember);
                 break;
@@ -46,8 +46,8 @@ public class LikesRepository(AppDbContext _dbContext) : ILikesRepository
 
         return await PagedList<Member>.CreateAsync(
             membersQuery,
-            resourceParameters.PageNumber,
-            resourceParameters.PageSize
+            likesParameters.PageNumber,
+            likesParameters.PageSize
         );
     }
 

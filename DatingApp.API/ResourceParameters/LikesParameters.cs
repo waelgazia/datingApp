@@ -2,7 +2,7 @@ using DatingApp.API.Base;
 
 namespace DatingApp.API.ResourceParameters;
 
-public class LikesResourceParameters : EntityPagination
+public class LikesParameters : EntityPagination
 {
 	public string MemberId { get; set; } = string.Empty;
 

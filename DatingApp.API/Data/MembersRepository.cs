@@ -23,21 +23,21 @@ public class MembersRepository(AppDbContext _dbContext) : IMembersRepository
     }
 
     public async Task<PagedList<Member>>
-        GetMembersAsync(MembersResourceParameters resourceParameters)
+        GetMembersAsync(MembersParameters membersParameters)
     {
         IQueryable<Member> membersQuery = _dbContext.Members.AsQueryable();
-        membersQuery = membersQuery.Where(m => m.Id != resourceParameters.CurrentMemberId);
+        membersQuery = membersQuery.Where(m => m.Id != membersParameters.CurrentMemberId);
 
-        DateOnly minDateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-resourceParameters.MaxAge - 1));
-        DateOnly maxDateOfBirth = DateOnly.FromDateTime(DateTime.Now.AddYears(-resourceParameters.MinAge));
+        DateOnly minDateOfBirth = DateOnly.FromDateTime(DateTime.Today.AddYears(-membersParameters.MaxAge - 1));
+        DateOnly maxDateOfBirth = DateOnly.FromDateTime(DateTime.Now.AddYears(-membersParameters.MinAge));
         membersQuery = membersQuery.Where(m => m.DateOfBirth >= minDateOfBirth && m.DateOfBirth <= maxDateOfBirth);
 
-        if (!string.IsNullOrWhiteSpace(resourceParameters.Gender))
+        if (!string.IsNullOrWhiteSpace(membersParameters.Gender))
         {
-            membersQuery = membersQuery.Where(m => m.Gender.ToLower() == resourceParameters.Gender.ToLower());
+            membersQuery = membersQuery.Where(m => m.Gender.ToLower() == membersParameters.Gender.ToLower());
         }
 
-        membersQuery = resourceParameters.OrderBy switch
+        membersQuery = membersParameters.OrderBy switch
         {
             "created" => membersQuery.OrderByDescending(m => m.Created),
             _ => membersQuery.OrderByDescending(m => m.LastActive)
@@ -45,8 +45,8 @@ public class MembersRepository(AppDbContext _dbContext) : IMembersRepository
 
         return await PagedList<Member>.CreateAsync(
             membersQuery,
-            resourceParameters.PageNumber,
-            resourceParameters.PageSize);
+            membersParameters.PageNumber,
+            membersParameters.PageSize);
     }
 
     public async Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId)

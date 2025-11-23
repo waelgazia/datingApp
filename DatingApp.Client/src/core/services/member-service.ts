@@ -7,6 +7,7 @@ import { STORAGE_KEY } from '../../constants/storage-keys';
 import { PhotoDto } from '../../interfaces/models/PhotoDto';
 import { environment } from '../../environments/environment';
 import { MemberDto } from '../../interfaces/models/MemberDto';
+import { QUERY_PARAMETERS } from '../../constants/query-parameters';
 import { PaginatedResult } from '../../interfaces/base/PaginatedResult';
 import { EditableMemberDto } from '../../interfaces/models/EditableMemberDto';
 import { MembersParameters } from '../../interfaces/ResourceParameters/MembersParameters';
@@ -17,16 +18,18 @@ import { MembersParameters } from '../../interfaces/ResourceParameters/MembersPa
 export class MemberService {
   private _httpClient = inject(HttpClient);
   private _baseUrl : string = environment.apiUrl;
-  member = signal<MemberDto | null>(null);
   editMode = signal<boolean>(false);
+
+  // the member signal represents the current member we are retrieving (not the current user)
+  member = signal<MemberDto | null>(null);
 
   getMembers(membersParameters: MembersParameters): Observable<PaginatedResult<MemberDto>> {
     let queryParameters = new HttpParams()
-      .set('pageNumber', membersParameters.pageNumber)
-      .set('pageSize', membersParameters.pageSize)
+      .set(QUERY_PARAMETERS.PAGE_NUMBER, membersParameters.pageNumber)
+      .set(QUERY_PARAMETERS.PAGE_SIZE, membersParameters.pageSize)
       .set('minAge', membersParameters.minAge)
       .set('maxAge', membersParameters.maxAge)
-      .set('orderBy', membersParameters.orderBy);
+      .set(QUERY_PARAMETERS.ORDER_BY, membersParameters.orderBy);
 
     if (membersParameters.gender) {
       queryParameters = queryParameters.append('gender', membersParameters.gender);

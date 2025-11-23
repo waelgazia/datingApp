@@ -1,1 +1,46 @@
-<p>member-messages works!</p>
+<div class="flex flex-col w-full h-[73.5vh]">
+  <div class="flex flex-col flex-grow overflow-auto">
+    @for (message of messages(); track message.id) {
+      <div class="chat"
+           [class.chat-start]="!message.currentUserIsSender"
+           [class.chat-end]="message.currentUserIsSender">
+
+        <div class="chat-image avatar">
+          <div class="w-10 rounded-full">
+            <img alt="image of user"
+                 [src]="message.senderImageUrl" >
+          </div>
+        </div>
+
+        <div class="chat-header">
+          {{ message.senderDisplayName }}
+          <time>{{ message.sentAt | date: 'short' }}</time>
+        </div>
+
+        <div class="chat-bubble">{{ message.content }}</div>
+        @if (message.currentUserIsSender && message.readAt) {
+          <div class="chat-footer opacity-50">Seen {{ message.readAt | timeAgo }}</div>
+        } @else if (message.currentUserIsSender && !message.readAt) {
+          <div class="chat-footer opacity-50">Not read</div>
+        } @else {
+          <div class="chat-footer opacity-50">Delivered</div>
+        }
+      </div>
+    }
+
+    <!-- used in scroll to bottom technique to address the issue of scrolling down after sending a message -->
+    <div #messageEndRef></div>
+  </div>
+
+  <div class="flex join w-full mt-4">
+    <input class="input w-full rounded-l"
+           [(ngModel)]="messageContent"
+           placeholder="Enter your message"
+           (keydown.enter)="sendMessage()">
+    <button type="submit"
+            (click)="sendMessage()"
+            class="btn btn-primary join-item">
+      Send
+    </button>
+  </div>
+</div>

@@ -25,10 +25,10 @@ public class MembersController : BaseApiController
 
     [HttpGet]
     public async Task<ActionResult<PagedList<MemberDto>>>
-        GetMembers([FromQuery] MembersResourceParameters resourceParameters)
+        GetMembers([FromQuery] MembersParameters membersParameters)
     {
-        resourceParameters.CurrentMemberId = User.GetMemberId();
-        PagedList<Member> paginatedMembers = await _memberRepository.GetMembersAsync(resourceParameters);
+        membersParameters.CurrentMemberId = User.GetMemberId();
+        PagedList<Member> paginatedMembers = await _memberRepository.GetMembersAsync(membersParameters);
 
         AddPaginationHeader(paginatedMembers);
         return Ok(paginatedMembers.ToMembersDto());

@@ -2,7 +2,7 @@ using DatingApp.API.Base;
 
 namespace DatingApp.API.ResourceParameters;
 
-public class MembersResourceParameters : EntityPagination
+public class MembersParameters : EntityPagination
 {
     public string? Gender { get; set; }
     public string? CurrentMemberId { get; set; }

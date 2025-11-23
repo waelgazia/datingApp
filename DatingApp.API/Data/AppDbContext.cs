@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
 	public DbSet<Member> Members { get; set; }
 	public DbSet<Photo> Photos { get; set; }
 	public DbSet<MemberLike> MemberLikes { get; set; }
+	public DbSet<Message> Messages { get; set; }
 
 	public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
 	{
@@ -25,6 +26,10 @@ public class AppDbContext : DbContext
 			v => v.ToUniversalTime(),                         /* runs when writing to the database. */
 			v => DateTime.SpecifyKind(v, DateTimeKind.Utc)    /* runs when reading from the database. */
 		);
+		var nullableDateTimeConverter = new ValueConverter<DateTime?, DateTime?>(
+			v => v.HasValue ? v.Value.ToUniversalTime() : null,                         /* runs when writing to the database. */
+			v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : null    /* runs when reading from the database. */
+		);
 
 		foreach (var entityType in modelBuilder.Model.GetEntityTypes())
 		{
@@ -33,6 +38,10 @@ public class AppDbContext : DbContext
 				if (property.ClrType == typeof(DateTime))
 				{
 					property.SetValueConverter(dateTimeConverter);
+				}
+				else if (property.ClrType == typeof(DateTime?))
+				{
+					property.SetValueConverter(nullableDateTimeConverter);
 				}
 			}
 		}

@@ -18,4 +18,6 @@ public class Member
     public List<Photo> Photos { get; set; } = [];
     public List<MemberLike> LikedMembers { get; set; } = [];
     public List<MemberLike> LikedByMembers { get; set; } = [];
+    public List<Message> MessageSent { get; set; } = [];
+    public List<Message> MessageReceived { get; set; } = [];
 }
