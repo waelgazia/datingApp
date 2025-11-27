@@ -1,4 +1,4 @@
-import { tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 
@@ -20,37 +20,58 @@ export class AccountService {
 
   currentUser = signal<UserDto | null>(null);
 
-  login(loginDto: LoginDto) {
-    return this._httpClient.post<UserDto>(this._baseUrl + 'accounts/login', loginDto).pipe(
+  // To use cookie with HTTP request in register and login we need to set withCredential to
+  // true so that we can get the refresh token cookie back from the API and save it as cookie
+  register(registerDto: RegisterDto) {
+    return this._httpClient.post<UserDto>(
+      this._baseUrl + 'accounts/register', registerDto, { withCredentials: true })
+    .pipe(
       tap(user => {
         if (user) {
           this.setCurrentUser(user);
+          this.startTokenRefreshInterval();
+        }
+      })
+    );
+  }
+
+  login(loginDto: LoginDto) {
+    return this._httpClient.post<UserDto>(this._baseUrl + 'accounts/login', loginDto, { withCredentials: true })
+    .pipe(
+      tap(user => {
+        if (user) {
+          this.setCurrentUser(user);
+          this.startTokenRefreshInterval();
         }
       })
     );
   }
 
   logout() {
-    localStorage.removeItem(STORAGE_KEY.USER);
     localStorage.removeItem(STORAGE_KEY.FILTERS);
     this.currentUser.set(null);
     this._likesService.clearLikeIds();
   }
 
-  register(registerDto: RegisterDto) {
-    return this._httpClient.post<UserDto>(this._baseUrl + 'accounts/register', registerDto).pipe(
-      tap(user => {
-        if (user) {
-          this.setCurrentUser(user);
-        }
-      })
-    );
+
+  refreshToken() : Observable<UserDto> {
+    return this._httpClient.post<UserDto>(
+      this._baseUrl + 'accounts/refresh-token', {}, { withCredentials: true })
+  }
+
+  startTokenRefreshInterval() {
+    setInterval(() => {
+      this._httpClient.post<UserDto>(this._baseUrl + 'accounts/refresh-token', {}, { withCredentials: true })
+        .subscribe({
+          next: user => this.setCurrentUser(user),
+          error: () => this.logout()
+        })
+    }, 7 * 60 * 1000);    // refresh the token each 7 minutes
   }
 
   setCurrentUser(user: UserDto) {
     user.roles = this.getRolesFromToken(user);
 
-    localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(user));
     this.currentUser.set(user);
     this._likesService.getLikeIds();
   }

@@ -17,7 +17,7 @@ export class HasRole implements OnInit{
     // structural directive uses to insert the template into the DOM. createEmbeddedView() Injects
     // the template into the DOM
 
-    if (this._accountService.currentUser()?.roles.some(r => this.appHasRole.includes(r))) {
+    if (this._accountService.currentUser()?.roles?.some(r => this.appHasRole.includes(r))) {
       this._viewContainerRef.createEmbeddedView(this._templateRef);
     } else {
       this._viewContainerRef.clear();

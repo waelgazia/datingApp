@@ -1,5 +1,6 @@
 using System.Text;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.IdentityModel.Tokens.Jwt;
 
 using Microsoft.AspNetCore.Identity;
@@ -38,7 +39,7 @@ public class TokenService(IConfiguration _configuration, UserManager<AppUser> _u
         SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTime.UtcNow.AddMinutes(7),
             SigningCredentials = signingCredentials
         };
 
@@ -46,5 +47,11 @@ public class TokenService(IConfiguration _configuration, UserManager<AppUser> _u
         SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
 
         return tokenHandler.WriteToken(token);
+    }
+
+    public string GenerateRefreshToken()
+    {
+        var randomBytes = RandomNumberGenerator.GetBytes(64);
+        return Convert.ToBase64String(randomBytes);
     }
 }

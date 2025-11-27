@@ -6,6 +6,8 @@ using DatingApp.API.DTOs;
 using DatingApp.API.Mapping;
 using DatingApp.API.Entities;
 using DatingApp.API.Interfaces;
+using DatingApp.API.Globals;
+using Microsoft.EntityFrameworkCore;
 
 namespace DatingApp.API.Controllers
 {
@@ -38,13 +40,15 @@ namespace DatingApp.API.Controllers
             }
             await _userManager.AddToRoleAsync(newUser, "Member");
 
+            await SetRefreshTokenCookie(newUser);
+
             return Ok(await newUser.ToUserDto(_tokenService));
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<AppUser>> Login(AccountLoginDto loginDto)
         {
-            var user = await _userManager.FindByEmailAsync(loginDto.Email);
+            AppUser? user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
             {
                 return Unauthorized("Invalid email or password!");
@@ -56,7 +60,48 @@ namespace DatingApp.API.Controllers
                 return Unauthorized("Invalid email or password!");
             }
 
+            await SetRefreshTokenCookie(user);
+
             return Ok(await user.ToUserDto(_tokenService));
+        }
+
+        [HttpPost("refresh-token")]
+        public async Task<ActionResult<UserDto>> RefreshToken()
+        {
+            string? refreshToken = Request.Cookies[Cookies.RefreshToken];
+
+            // This endpoint will be called every 5 minutes from the front-end to refresh the token
+            // if the user is still using the app, refreshToken can be null if the user logged out,
+            // so we will return a NoContent() instead of Unauthorized() to prevent showing a toast
+            // with Unauthorized error in the front-end.
+            if (refreshToken == null) return NoContent();
+
+            AppUser? user = await _userManager.Users.FirstOrDefaultAsync(
+                u => u.RefreshedToken == refreshToken && u.RefreshedTokenExpiry > DateTime.UtcNow);
+            if (user == null) return Unauthorized();
+
+            await SetRefreshTokenCookie(user);
+
+            return Ok(await user.ToUserDto(_tokenService));
+        }
+
+        private async Task SetRefreshTokenCookie(AppUser user)
+        {
+            string refreshToken = _tokenService.GenerateRefreshToken();
+            user.RefreshedToken = refreshToken;
+            user.RefreshedTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+            await _userManager.UpdateAsync(user);
+
+            CookieOptions cookieOptions = new CookieOptions()
+            {
+                Secure = true,
+                HttpOnly = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+
+            Response.Cookies.Append(Cookies.RefreshToken, refreshToken, cookieOptions);
         }
     }
 }

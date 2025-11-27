@@ -70,6 +70,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseCors(corsPolicy => corsPolicy
     .AllowAnyHeader()
     .AllowAnyMethod()
+    .AllowCredentials()   // allows send and receive cookies (i.e., refresh token cookie)
     .WithOrigins("http://localhost:4200", "https://localhost:4200")
     .WithExposedHeaders([HeaderNames.Pagination])
 );
