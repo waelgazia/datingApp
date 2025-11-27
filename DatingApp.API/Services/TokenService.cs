@@ -2,6 +2,7 @@ using System.Text;
 using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
 using DatingApp.API.Entities;
@@ -9,9 +10,9 @@ using DatingApp.API.Interfaces;
 
 namespace DatingApp.API.Services;
 
-public class TokenService(IConfiguration _configuration) : ITokenService
+public class TokenService(IConfiguration _configuration, UserManager<AppUser> _userManager) : ITokenService
 {
-    public string CreateToken(AppUser user)
+    public async Task<string> CreateToken(AppUser user)
     {
         string tokenKey = _configuration["Authentication:TokenSecretKey"]
             ?? throw new NullReferenceException("Can not get token secret key!");
@@ -26,9 +27,13 @@ public class TokenService(IConfiguration _configuration) : ITokenService
 
         List<Claim> claims = new List<Claim>
         {
-            new (ClaimTypes.Email, user.Email),
+            new (ClaimTypes.Email, user.Email!),
             new (ClaimTypes.NameIdentifier, user.Id),
         };
+
+        // add the user roles to the token
+        IList<string> roles = await _userManager.GetRolesAsync(user);
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
         SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
         {

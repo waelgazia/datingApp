@@ -1,11 +1,7 @@
-using System.Text;
-using System.Security.Cryptography;
-
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 using DatingApp.API.Base;
-using DatingApp.API.Data;
 using DatingApp.API.DTOs;
 using DatingApp.API.Mapping;
 using DatingApp.API.Entities;
@@ -13,25 +9,16 @@ using DatingApp.API.Interfaces;
 
 namespace DatingApp.API.Controllers
 {
-    public class AccountsController(AppDbContext _dbContext, ITokenService _tokenService) : BaseApiController
+    public class AccountsController(UserManager<AppUser> _userManager, ITokenService _tokenService) : BaseApiController
     {
         [HttpPost("register")]
-        public async Task<ActionResult<UserDto>>
-            Register([FromBody] AccountForCreationDto accountDto)
+        public async Task<ActionResult<UserDto>> Register([FromBody] AccountForCreationDto accountDto)
         {
-            if (await EmailExists(accountDto.Email))
-            {
-                return BadRequest("The provided email is already registered!");
-            }
-
-            using HMACSHA512 hmac = new HMACSHA512();
-
             AppUser newUser = new AppUser
             {
                 DisplayName = accountDto.DisplayName,
                 Email = accountDto.Email,
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(accountDto.Password)),
-                PasswordSalt = hmac.Key,
+                UserName = accountDto.Email,
                 Member = new Member()
                 {
                     DisplayName = accountDto.DisplayName,
@@ -43,35 +30,33 @@ namespace DatingApp.API.Controllers
             };
             newUser.Member.Id = newUser.Id;
 
-            _dbContext.Users.Add(newUser);
-            await _dbContext.SaveChangesAsync();
+            var createResult = await _userManager.CreateAsync(newUser, accountDto.Password);
+            if (!createResult.Succeeded)
+            {
+                createResult.Errors.ToList().ForEach(e => ModelState.AddModelError("identity", e.Description));
+                return ValidationProblem();
+            }
+            await _userManager.AddToRoleAsync(newUser, "Member");
 
-            return Ok(newUser.ToUserDto(_tokenService));
-        }
-
-        private async Task<bool> EmailExists(string email)
-        {
-            return await _dbContext.Users.AnyAsync(u => u.Email.ToLower() == email.ToLower());
+            return Ok(await newUser.ToUserDto(_tokenService));
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<AppUser>> Login(AccountLoginDto loginDto)
         {
-            var user = await _dbContext.Users
-                .SingleOrDefaultAsync(u => u.Email.ToLower() == loginDto.Email.ToLower());
-
+            var user = await _userManager.FindByEmailAsync(loginDto.Email);
             if (user == null)
             {
-                return Unauthorized("Invalid email address!");
+                return Unauthorized("Invalid email or password!");
             }
 
-            using HMACSHA512 hmac = new HMACSHA512(user.PasswordSalt);
-            byte[] computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
+            bool isValidPassword = await _userManager.CheckPasswordAsync(user, loginDto.Password);
+            if (!isValidPassword)
+            {
+                return Unauthorized("Invalid email or password!");
+            }
 
-            if (!computedHash.SequenceEqual(user.PasswordHash))
-                return Unauthorized("Invalid password!");
-
-            return Ok(user.ToUserDto(_tokenService));
+            return Ok(await user.ToUserDto(_tokenService));
         }
     }
 }

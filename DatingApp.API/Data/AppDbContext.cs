@@ -2,12 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 using DatingApp.API.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace DatingApp.API.Data;
 
-public class AppDbContext : DbContext
+public class AppDbContext : IdentityDbContext<AppUser>
 {
-	public DbSet<AppUser> Users { get; set; }
 	public DbSet<Member> Members { get; set; }
 	public DbSet<Photo> Photos { get; set; }
 	public DbSet<MemberLike> MemberLikes { get; set; }
@@ -21,6 +22,13 @@ public class AppDbContext : DbContext
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
 		base.OnModelCreating(modelBuilder);
+
+		// add application roles
+		modelBuilder.Entity<IdentityRole>().HasData(
+			new IdentityRole { Id = "member-id", Name = "Member", NormalizedName = "MEMBER" },
+			new IdentityRole { Id = "moderator-id", Name = "Moderator", NormalizedName = "MODERATOR" },
+			new IdentityRole { Id = "admin-id", Name = "Admin", NormalizedName = "ADMIN" }
+		);
 
 		var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
 			v => v.ToUniversalTime(),                         /* runs when writing to the database. */

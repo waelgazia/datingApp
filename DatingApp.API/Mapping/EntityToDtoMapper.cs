@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+
 using DatingApp.API.DTOs;
 using DatingApp.API.Entities;
 using DatingApp.API.Interfaces;
@@ -7,14 +8,14 @@ namespace DatingApp.API.Mapping;
 
 public static class EntityToDtoMapper
 {
-    public static UserDto ToUserDto(this AppUser appUser, ITokenService tokenService)
+    public static async Task<UserDto> ToUserDto(this AppUser appUser, ITokenService tokenService)
     {
         return new UserDto
         {
             Id = appUser.Id,
-            Email = appUser.Email,
+            Email = appUser.Email!,
             DisplayName = appUser.DisplayName,
-            Token = tokenService.CreateToken(appUser),
+            Token = await tokenService.CreateToken(appUser),
             ImageUrl = appUser.ImageUrl
         };
     }

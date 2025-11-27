@@ -1,6 +1,7 @@
 using System.Text;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
@@ -8,6 +9,7 @@ using DatingApp.API.Data;
 using DatingApp.API.helper;
 using DatingApp.API.Globals;
 using DatingApp.API.Services;
+using DatingApp.API.Entities;
 using DatingApp.API.Interfaces;
 using DatingApp.API.Middlewares;
 
@@ -31,6 +33,16 @@ builder.Services.AddScoped<LogUserActivity>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
+builder.Services.AddIdentityCore<AppUser>(
+        options =>
+        {
+            options.Password.RequireNonAlphanumeric = false;
+            options.User.RequireUniqueEmail = true;
+        }
+    )
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<AppDbContext>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -45,6 +57,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false
         };
     });
+
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy(Policies.REQUIRE_ADMIN_ROLE, policy => policy.RequireRole(Roles.ADMIN))
+    .AddPolicy(Policies.MODERATE_PHOTO_ROLE, policy => policy.RequireRole(Roles.MODERATOR));
 
 var app = builder.Build();
 
@@ -71,7 +87,9 @@ using (IServiceScope scope = app.Services.CreateScope())
     {
         AppDbContext context = services.GetRequiredService<AppDbContext>();
         await context.Database.MigrateAsync();
-        await Seed.SeedUserAsync(context);
+
+        UserManager<AppUser> userManager = services.GetRequiredService<UserManager<AppUser>>();
+        await Seed.SeedUserAsync(userManager);
     }
     catch (Exception ex)
     {

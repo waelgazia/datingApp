@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { Home } from '../features/home/home';
 import { Lists } from '../features/lists/lists';
+import { Admin } from '../features/admin/admin';
 import { Messages } from '../features/messages/messages';
 import { NotFound } from '../shared/errors/not-found/not-found';
 import { TestErrors } from '../features/test-errors/test-errors';
@@ -12,6 +13,7 @@ import { MemberProfile } from '../features/members/member-profile/member-profile
 import { MemberDetailed } from '../features/members/member-detailed/member-detailed';
 import { MemberMessages } from '../features/members/member-messages/member-messages';
 
+import { adminGuard } from '../core/guards/admin-guard';
 import { memberResolver } from '../features/members/member-resolver';
 import { authenticateGuard } from '../core/guards/authenticate-guard';
 import { preventUnsavedChangesGuard } from '../core/guards/prevent-unsaved-changes-guard';
@@ -38,6 +40,7 @@ export const routes: Routes = [
       },
       { path: 'lists', component: Lists },
       { path: 'messages', component: Messages },
+      { path: 'admin', component: Admin, canActivate: [adminGuard] }
     ]
   },
   { path: 'errors', component: TestErrors },

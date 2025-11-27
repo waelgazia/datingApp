@@ -2,6 +2,7 @@ import { tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
 
+import { ROLES } from '../../constants/roles';
 import { LikesService } from './likes-service';
 import { UserDto } from '../../interfaces/models/UserDto';
 import { STORAGE_KEY } from '../../constants/storage-keys';
@@ -47,8 +48,28 @@ export class AccountService {
   }
 
   setCurrentUser(user: UserDto) {
+    user.roles = this.getRolesFromToken(user);
+
     localStorage.setItem(STORAGE_KEY.USER, JSON.stringify(user));
     this.currentUser.set(user);
     this._likesService.getLikeIds();
+  }
+
+  private getRolesFromToken(user: UserDto): string[] {
+    const payload = user.token.split('.')[1];
+    const decoded = atob(payload);
+    const jsonPayload = JSON.parse(decoded);
+
+    return Array.isArray(jsonPayload.role)
+      ? jsonPayload.role
+      : [ jsonPayload.role ];
+  }
+
+  isCurrentUserAdmin() {
+    return this.currentUser()?.roles.includes(ROLES.ADMIN);
+  }
+
+  isCurrentUserModerator() {
+    return this.currentUser()?.roles.includes(ROLES.MODERATOR);
   }
 }

@@ -3,5 +3,6 @@ export interface UserDto {
   displayName: string,
   email: string,
   token: string,
-  imageUrl? : string
+  imageUrl? : string,
+  roles: string[]
 }
