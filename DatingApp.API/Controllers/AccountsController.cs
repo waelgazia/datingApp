@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 using DatingApp.API.Base;
 using DatingApp.API.DTOs;
 using DatingApp.API.Mapping;
+using DatingApp.API.Globals;
 using DatingApp.API.Entities;
 using DatingApp.API.Interfaces;
-using DatingApp.API.Globals;
-using Microsoft.EntityFrameworkCore;
+using DatingApp.API.Extensions;
 
 namespace DatingApp.API.Controllers
 {
@@ -65,6 +66,30 @@ namespace DatingApp.API.Controllers
             return Ok(await user.ToUserDto(_tokenService));
         }
 
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            AppUser? user = await _userManager.FindByIdAsync(User.GetMemberId());
+            if (user == null) return Unauthorized("Can't perform this action!");
+
+            user.RefreshedToken = null;
+            user.RefreshedTokenExpiry = null;
+            await _userManager.UpdateAsync(user);
+
+            // remove refresh token cookie
+            CookieOptions cookieOptions = new CookieOptions()
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(-1)
+            };
+
+            Response.Cookies.Append(Cookies.RefreshToken, "", cookieOptions);
+
+            return NoContent();
+        }
+
         [HttpPost("refresh-token")]
         public async Task<ActionResult<UserDto>> RefreshToken()
         {
@@ -74,7 +99,7 @@ namespace DatingApp.API.Controllers
             // if the user is still using the app, refreshToken can be null if the user logged out,
             // so we will return a NoContent() instead of Unauthorized() to prevent showing a toast
             // with Unauthorized error in the front-end.
-            if (refreshToken == null) return NoContent();
+            if (string.IsNullOrWhiteSpace(refreshToken)) return NoContent();
 
             AppUser? user = await _userManager.Users.FirstOrDefaultAsync(
                 u => u.RefreshedToken == refreshToken && u.RefreshedTokenExpiry > DateTime.UtcNow);

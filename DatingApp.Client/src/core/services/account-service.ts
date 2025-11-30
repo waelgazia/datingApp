@@ -48,9 +48,16 @@ export class AccountService {
   }
 
   logout() {
-    localStorage.removeItem(STORAGE_KEY.FILTERS);
-    this.currentUser.set(null);
-    this._likesService.clearLikeIds();
+    return this._httpClient.post(this._baseUrl + 'accounts/logout', {}, { withCredentials: true })
+      .pipe(
+        tap({
+          next: () => {
+            localStorage.removeItem(STORAGE_KEY.FILTERS);
+            this.currentUser.set(null);
+            this._likesService.clearLikeIds();
+          }
+        })
+      )
   }
 
 

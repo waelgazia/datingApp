@@ -1,4 +1,5 @@
 import { Component, signal } from '@angular/core';
+
 import { Register } from "../account/register/register";
 
 @Component({

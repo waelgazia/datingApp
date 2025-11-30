@@ -3,11 +3,11 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { themes } from '../theme';
+import { STORAGE_KEY } from '../../constants/storage-keys';
 import { LoginDto } from '../../interfaces/models/LoginDto';
 import { BusyService } from '../../core/services/busy-service';
 import { ToastService } from '../../core/services/toast-service';
 import { AccountService } from '../../core/services/account-service';
-import { STORAGE_KEY } from '../../constants/storage-keys';
 
 @Component({
   selector: 'app-nav',
@@ -47,8 +47,9 @@ export class Nav implements OnInit{
   }
 
   loggedOut() {
-    this.accountService.logout();
-    this._router.navigateByUrl('/');
+    this.accountService.logout().subscribe({
+      next: () => this._router.navigateByUrl('/')
+    });
   }
 
   onThemeSelected(theme: string) {

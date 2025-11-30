@@ -13,13 +13,14 @@ import { MemberProfile } from '../features/members/member-profile/member-profile
 import { MemberDetailed } from '../features/members/member-detailed/member-detailed';
 import { MemberMessages } from '../features/members/member-messages/member-messages';
 
+import { homeGuard } from '../core/guards/home-guard';
 import { adminGuard } from '../core/guards/admin-guard';
 import { memberResolver } from '../features/members/member-resolver';
 import { authenticateGuard } from '../core/guards/authenticate-guard';
 import { preventUnsavedChangesGuard } from '../core/guards/prevent-unsaved-changes-guard';
 
 export const routes: Routes = [
-  { path: '', component: Home },
+  { path: '', component: Home ,canActivate: [homeGuard] },
   { // workaround to use a single guard on punch of routes.
     path: '',
     runGuardsAndResolvers: 'always',
