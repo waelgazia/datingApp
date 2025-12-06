@@ -1,11 +1,12 @@
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, effect, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Component, effect, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 import { TimeAgoPipe } from '../../../core/pipes/time-ago-pipe';
-import { MessageDto } from '../../../interfaces/models/MessageDto';
 import { MemberService } from '../../../core/services/member-service';
 import { MessagesService } from '../../../core/services/messages-service';
+import { PresenceService } from '../../../core/services/presence-service';
 
 @Component({
   selector: 'app-member-messages',
@@ -13,20 +14,21 @@ import { MessagesService } from '../../../core/services/messages-service';
   templateUrl: './member-messages.html',
   styleUrl: './member-messages.css'
 })
-export class MemberMessages implements OnInit {
+export class MemberMessages implements OnInit, OnDestroy {
   @ViewChild('messageEndRef') messageEndRef!: ElementRef;
 
   private _memberService = inject(MemberService);
-  private _messagesService = inject(MessagesService);
+  private _route = inject(ActivatedRoute);
 
-  protected messages = signal<MessageDto[]>([]);
+  protected messagesService = inject(MessagesService);
+  protected presenceService = inject(PresenceService);
   protected messageContent = '';
 
   constructor() {
     // The code inside effect() runs immediately once when the component is constructed,
     // and every time the messages signal changes, meaning you call set, update, or mutate on it.
     effect(() => {
-      const currentMessages = this.messages();
+      const currentMessages = this.messagesService.messageThread();
       if (currentMessages.length > 0) {
         this.scrollToBottom();
       }
@@ -34,38 +36,28 @@ export class MemberMessages implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadMessages();
+    this._route.parent?.paramMap.subscribe({
+      next: params => {
+        const userToMessageId = params.get('id');
+        if (!userToMessageId) {
+          throw new Error("Cannot connect to message hub");
+        }
+
+        this.messagesService.createHubConnection(userToMessageId);
+      }
+    })
   }
 
-  loadMessages() {
-    const memberId = this._memberService.member()?.id;
-    if (memberId) {
-      this._messagesService.getMessageThread(memberId).subscribe({
-        next: messages => this.messages.set(
-          messages.map(message => ({
-            ...message,
-            currentUserIsSender: message.senderId !== memberId
-          }))
-        )
-      })
-    }
+  ngOnDestroy(): void {
+    this.messagesService.stopHubConnection();
   }
 
   sendMessage() {
     const recipientId = this._memberService.member()?.id;
-    if (!recipientId) return;
+    if (!recipientId || this.messageContent === '') return;
 
-    this._messagesService.sendMessage(recipientId, this.messageContent).subscribe({
-      next: message => {
-        console.log(message);
-
-        this.messages.update(messages => {
-          message.currentUserIsSender = true;
-          return [...messages, message]
-        });
-
-        this.messageContent = '';
-      }
+    this.messagesService.sendMessage(recipientId, this.messageContent)?.then(() => {
+      this.messageContent = '';
     });
   }
 

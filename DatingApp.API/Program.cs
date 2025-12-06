@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using DatingApp.API.Data;
 using DatingApp.API.helper;
 using DatingApp.API.Globals;
+using DatingApp.API.SignalR;
 using DatingApp.API.Services;
 using DatingApp.API.Entities;
 using DatingApp.API.Interfaces;
@@ -30,6 +31,8 @@ builder.Services.AddScoped<IMembersRepository, MembersRepository>();
 builder.Services.AddScoped<ILikesRepository, LikesRepository>();
 builder.Services.AddScoped<IMessagesRepository, MessagesRepository>();
 builder.Services.AddScoped<LogUserActivity>();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<PresenceTracker>();
 
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 
@@ -56,6 +59,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = false,
             ValidateAudience = false
         };
+
+        // WebSockets cannot send custom headers (including Authorization). So JWT
+        // token cannot be automatically sent to the Hub. SignalR solves this by
+        // allowing the token to be passed using access_token query string
+        // parameter. You must explicitly configure the client to send it that way.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                string? accessToken = context.Request.Query["access_token"];
+                PathString requestPath = context.Request.Path;
+                if (!string.IsNullOrWhiteSpace(accessToken) && requestPath.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorizationBuilder()
@@ -79,6 +101,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<PresenceHub>("hubs/presence");
+app.MapHub<MessageHub>("hubs/messages");
 
 // database seeding
 using (IServiceScope scope = app.Services.CreateScope())
@@ -88,6 +112,7 @@ using (IServiceScope scope = app.Services.CreateScope())
     {
         AppDbContext context = services.GetRequiredService<AppDbContext>();
         await context.Database.MigrateAsync();
+        await context.Connections.ExecuteDeleteAsync(); /* delete all user connections when restarting the server */
 
         UserManager<AppUser> userManager = services.GetRequiredService<UserManager<AppUser>>();
         await Seed.SeedUserAsync(userManager);

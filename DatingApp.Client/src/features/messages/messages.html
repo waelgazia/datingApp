@@ -40,7 +40,7 @@
                    alt="member image"
                    src="{{isInbox ? message.senderImageUrl : message.recipientImageUrl}}">
             </div>
-            <div>{{ isInbox ? message.senderDisplayName : message.recipientDisplayName }}</div>
+            <div>{{ isInbox ? message.senderDisplayName || '/user.png' : message.recipientDisplayName || '/user.png' }}</div>
           </div>
          </td>
          <td class="truncate w-4/9">{{ message.content }}</td>

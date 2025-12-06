@@ -4,6 +4,7 @@ import { inject, Injectable, signal } from '@angular/core';
 
 import { ROLES } from '../../constants/roles';
 import { LikesService } from './likes-service';
+import { PresenceService } from './presence-service';
 import { UserDto } from '../../interfaces/models/UserDto';
 import { STORAGE_KEY } from '../../constants/storage-keys';
 import { LoginDto } from '../../interfaces/models/LoginDto';
@@ -17,6 +18,7 @@ export class AccountService {
   private _httpClient = inject(HttpClient);
   private _likesService = inject(LikesService);
   private _baseUrl : string = environment.apiUrl;
+  private _presenceService = inject(PresenceService);
 
   currentUser = signal<UserDto | null>(null);
 
@@ -55,6 +57,8 @@ export class AccountService {
             localStorage.removeItem(STORAGE_KEY.FILTERS);
             this.currentUser.set(null);
             this._likesService.clearLikeIds();
+
+            this._presenceService.stopHubConnection();
           }
         })
       )
@@ -81,6 +85,8 @@ export class AccountService {
 
     this.currentUser.set(user);
     this._likesService.getLikeIds();
+
+    this._presenceService.createHubConnection(user);
   }
 
   private getRolesFromToken(user: UserDto): string[] {

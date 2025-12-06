@@ -1,9 +1,9 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 using DatingApp.API.Entities;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 
 namespace DatingApp.API.Data;
 
@@ -13,6 +13,8 @@ public class AppDbContext : IdentityDbContext<AppUser>
 	public DbSet<Photo> Photos { get; set; }
 	public DbSet<MemberLike> MemberLikes { get; set; }
 	public DbSet<Message> Messages { get; set; }
+	public DbSet<Group> Groups { get; set; }
+	public DbSet<Connection> Connections { get; set; }
 
 	public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
 	{

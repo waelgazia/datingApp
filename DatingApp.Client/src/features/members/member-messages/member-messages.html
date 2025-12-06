@@ -1,14 +1,15 @@
 <div class="flex flex-col w-full h-[73.5vh]">
   <div class="flex flex-col flex-grow overflow-auto">
-    @for (message of messages(); track message.id) {
+    @for (message of messagesService.messageThread(); track message.id) {
       <div class="chat"
            [class.chat-start]="!message.currentUserIsSender"
            [class.chat-end]="message.currentUserIsSender">
 
-        <div class="chat-image avatar">
+        <div class="chat-image avatar"
+             [class.avatar-online]="presenceService.onlineUsers().includes(message.senderId || message.recipientId)">
           <div class="w-10 rounded-full">
             <img alt="image of user"
-                 [src]="message.senderImageUrl" >
+                 [src]="message.senderImageUrl || '/user.png'" >
           </div>
         </div>
 

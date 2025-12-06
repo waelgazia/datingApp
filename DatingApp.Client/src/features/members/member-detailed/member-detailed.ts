@@ -4,8 +4,9 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AgePipe } from '../../../core/pipes/age-pipe';
-import { AccountService } from '../../../core/services/account-service';
 import { MemberService } from '../../../core/services/member-service';
+import { AccountService } from '../../../core/services/account-service';
+import { PresenceService } from '../../../core/services/presence-service';
 
 @Component({
   selector: 'app-member-detailed',
@@ -15,10 +16,11 @@ import { MemberService } from '../../../core/services/member-service';
 })
 export class MemberDetailed implements OnInit {
   private _accountService = inject(AccountService);
-  protected memberService = inject(MemberService);
   private _route = inject(ActivatedRoute);
   private _router = inject(Router);
 
+  protected memberService = inject(MemberService);
+  protected _presenceService = inject(PresenceService);
   protected title = signal<string | undefined>('Profile');
 
   protected isCurrentUser = computed(() => {

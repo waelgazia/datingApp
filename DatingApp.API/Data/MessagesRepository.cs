@@ -69,6 +69,38 @@ public class MessagesRepository(AppDbContext _dbContext) : IMessagesRepository
             .ToListAsync();
     }
 
+    public void AddGroup(Group group)
+    {
+        _dbContext.Groups.Add(group);
+    }
+
+    public async Task RemoveConnection(string connectionId)
+    {
+        await _dbContext.Connections
+           .Where(g => g.ConnectionId == connectionId)
+           .ExecuteDeleteAsync();
+    }
+
+    public async Task<Connection?> GetConnection(string connectionId)
+    {
+        return await _dbContext.Connections.FindAsync(connectionId);
+    }
+
+    public async Task<Group?> GetMessageGroup(string groupName)
+    {
+        return await _dbContext.Groups
+            .Include(g => g.Connections)
+            .FirstOrDefaultAsync(g => g.Name == groupName);
+    }
+
+    public async Task<Group?> GetGroupForConnection(string connectionId)
+    {
+        return await _dbContext.Groups
+            .Include(g => g.Connections)
+            .Where(g => g.Connections.Any(c => c.ConnectionId == connectionId))
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<bool> SaveAllAsync()
     {
         return await _dbContext.SaveChangesAsync() >= 0;
