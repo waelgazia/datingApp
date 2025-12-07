@@ -7,6 +7,7 @@ import { MessageDto } from '../../interfaces/models/MessageDto';
 import { MessagesService } from '../../core/services/messages-service';
 import { PaginatedResult } from '../../interfaces/base/PaginatedResult';
 import { MESSAGES_CONTAINERS } from '../../constants/messages-containers';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog-service';
 import { MessagesParameters } from '../../interfaces/ResourceParameters/MessagesParameters';
 
 @Component({
@@ -17,6 +18,7 @@ import { MessagesParameters } from '../../interfaces/ResourceParameters/Messages
 })
 export class Messages implements OnInit {
   private _messagesService = inject(MessagesService);
+  private _confirmDialogService = inject(ConfirmDialogService);
 
   // used to update UI after fetching the messages based on the container
   protected fetchedContainer = MESSAGES_CONTAINERS.INBOX;
@@ -40,9 +42,16 @@ export class Messages implements OnInit {
     });
   }
 
-  deleteMessage(event: Event, messageId: string) {
+  async confirmDelete(event: Event, messageId: string) {
     event.stopPropagation();
 
+    const ok = await this._confirmDialogService.confirm('Are you sure you want to delete this message?');
+    if (ok) {
+      this.deleteMessage(messageId);
+    }
+  }
+
+  deleteMessage(messageId: string) {
     this._messagesService.deleteMessage(messageId).subscribe({
       next: () => {
         // you can just call this.loadMessages() instead of doing the following
