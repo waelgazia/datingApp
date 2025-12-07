@@ -33,6 +33,9 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.method.includes('DELETE') && req.url.includes('/messages')) {
     invalidateCache('/messages')
   }
+  if (req.method.includes('POST') && req.url.includes('/logout')) {
+    cache.clear(); // clear the cache when the user logout.
+  }
 
   if (req.method === 'GET') {
     const cachedResponse = cache.get(cacheKey);

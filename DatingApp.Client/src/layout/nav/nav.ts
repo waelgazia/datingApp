@@ -11,11 +11,11 @@ import { AccountService } from '../../core/services/account-service';
 
 @Component({
   selector: 'app-nav',
-  imports: [ FormsModule, RouterLink, RouterLinkActive ],
+  imports: [FormsModule, RouterLink, RouterLinkActive],
   templateUrl: './nav.html',
   styleUrl: './nav.css'
 })
-export class Nav implements OnInit{
+export class Nav implements OnInit {
   private _router = inject(Router)
   private _toastService = inject(ToastService);
 
@@ -24,7 +24,8 @@ export class Nav implements OnInit{
   protected loginDto = {} as LoginDto;
 
   protected selectedTheme = signal<string>(localStorage.getItem(STORAGE_KEY.THEME) || 'light');
-  protected themes : string[] = themes;
+  protected themes: string[] = themes;
+  protected loading = signal<boolean>(false);
 
   ngOnInit(): void {
     // to set a theme using daisyUI
@@ -32,6 +33,7 @@ export class Nav implements OnInit{
   }
 
   login() {
+    this.loading.set(true);
     this.accountService.login(this.loginDto)
       .subscribe({
         next: () => {
@@ -42,7 +44,8 @@ export class Nav implements OnInit{
         error: error => {
           console.error(error);
           this._toastService.error('Error happens when signing in');
-        }
+        },
+        complete: () => this.loading.set(false)
       });
   }
 
@@ -63,6 +66,14 @@ export class Nav implements OnInit{
     const themeDropdown = document.activeElement as HTMLDivElement;
     if (themeDropdown) {
       themeDropdown.blur();
+    }
+  }
+
+  // close the user dropdown once the user clicks on edit profile or logout
+  onUserDropdownSelected() {
+    const userDropdown = document.activeElement as HTMLDivElement;
+    if (userDropdown) {
+      userDropdown.blur();
     }
   }
 }

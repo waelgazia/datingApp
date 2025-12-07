@@ -25,15 +25,6 @@ export class MemberCard {
   toggleLike(event: Event) {
     // stop navigation to the member detail when click on the card
     event.stopPropagation();
-
-    this._likesService.toggleLike(this.member().id).subscribe({
-      next: () => {
-        if (this.hasLiked()) {
-          this._likesService.userLikeIds.update(ids => ids.filter(x => x !== this.member().id))
-        } else {
-          this._likesService.userLikeIds.update(ids => ([...ids, this.member().id]));
-        }
-      }
-    })
+    this._likesService.toggleLike(this.member().id);
   }
 }

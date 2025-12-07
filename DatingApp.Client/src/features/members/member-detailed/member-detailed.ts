@@ -4,6 +4,7 @@ import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AgePipe } from '../../../core/pipes/age-pipe';
+import { LikesService } from '../../../core/services/likes-service';
 import { MemberService } from '../../../core/services/member-service';
 import { AccountService } from '../../../core/services/account-service';
 import { PresenceService } from '../../../core/services/presence-service';
@@ -21,12 +22,15 @@ export class MemberDetailed implements OnInit {
 
   protected memberService = inject(MemberService);
   protected _presenceService = inject(PresenceService);
+  protected _likesService = inject(LikesService);
+
   protected title = signal<string | undefined>('Profile');
 
   protected isCurrentUser = computed(() => {
     return this._accountService.currentUser()?.id === this.memberService.member()?.id;
   });
   protected editModeEnabled = computed(() => this.memberService.editMode());
+  protected hasLiked = computed(() => this._likesService.userLikeIds().includes(this.memberService.member()?.id!));
 
   ngOnInit(): void {
     // get data from member-resolver
@@ -46,6 +50,10 @@ export class MemberDetailed implements OnInit {
 
   toggleEdit() {
     this.memberService.editMode.set(!this.memberService.editMode());
+  }
+
+  toggleLike(memberId: string) {
+    this._likesService.toggleLike(memberId);
   }
 
   /*
