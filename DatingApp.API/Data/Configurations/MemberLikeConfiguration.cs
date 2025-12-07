@@ -13,6 +13,7 @@ public class MemberLikeConfiguration : IEntityTypeConfiguration<MemberLike>
         memberLikeBuilder
             .HasKey(memberLike => new { memberLike.SourceMemberId, memberLike.TargetMemberId });
 
+        // many-to-many relationships
         memberLikeBuilder
             .HasOne(memberLike => memberLike.SourceMember)
             .WithMany(member => member.LikedMembers)

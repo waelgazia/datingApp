@@ -68,9 +68,4 @@ public class LikesRepository(AppDbContext _dbContext) : ILikesRepository
     {
         _dbContext.MemberLikes.Remove(like);
     }
-
-    public async Task<bool> SaveAllChangesAsync()
-    {
-        return await _dbContext.SaveChangesAsync() >= 0;
-    }
 }

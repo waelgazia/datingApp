@@ -10,10 +10,7 @@ using DatingApp.API.Interfaces;
 namespace DatingApp.API.SignalR;
 
 [Authorize]
-public class MessageHub(
-    IMembersRepository _membersRepository,
-    IMessagesRepository _messagesRepository,
-    IHubContext<PresenceHub> _presenceHub) : Hub
+public class MessageHub(IUnitOfWork _uow, IHubContext<PresenceHub> _presenceHub) : Hub
 {
     public async override Task OnConnectedAsync()
     {
@@ -26,7 +23,7 @@ public class MessageHub(
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
         await AddToGroup(groupName);
 
-        var messages = await _messagesRepository.GetMessageThreadAsync(GetUserId(), otherUserId);
+        var messages = await _uow.MessagesRepository.GetMessageThreadAsync(GetUserId(), otherUserId);
 
         await Clients.Group(groupName).SendAsync("ReceiveMessagesThread", messages.ToMessagesDto());
     }
@@ -36,8 +33,8 @@ public class MessageHub(
     /// </summary>
     public async Task SendMessage(MessageForCreationDto createMessageDto)
     {
-        Member? sender = await _membersRepository.GetMemberByIdAsync(GetUserId());
-        Member? recipient = await _membersRepository.GetMemberByIdAsync(createMessageDto.RecipientId);
+        Member? sender = await _uow.MembersRepository.GetMemberByIdAsync(GetUserId());
+        Member? recipient = await _uow.MembersRepository.GetMemberByIdAsync(createMessageDto.RecipientId);
 
         if (sender == null || recipient == null || sender.Id == createMessageDto.RecipientId)
         {
@@ -54,13 +51,13 @@ public class MessageHub(
         // check if the recipient is online (by checking if he is in a chat group)
         // to set the read at property.
         string groupName = GetGroupName(sender.Id, recipient.Id);
-        Group? group = await _messagesRepository.GetMessageGroup(groupName);
+        Group? group = await _uow.MessagesRepository.GetMessageGroup(groupName);
         bool isRecipientConnectedToMessageGroup = group != null && group.Connections.Any(c => c.UserId == recipient.Id);
 
         if (isRecipientConnectedToMessageGroup) message.ReadAt = DateTime.UtcNow;
 
-        _messagesRepository.AddMessage(message);
-        if (await _messagesRepository.SaveAllAsync())
+        _uow.MessagesRepository.AddMessage(message);
+        if (await _uow.Complete())
         {
             await Clients.Group(groupName).SendAsync("NewMessage", message.ToMessageDto());
 
@@ -79,7 +76,7 @@ public class MessageHub(
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        await _messagesRepository.RemoveConnection(Context.ConnectionId);
+        await _uow.MessagesRepository.RemoveConnection(Context.ConnectionId);
         await base.OnDisconnectedAsync(exception);
     }
 
@@ -97,17 +94,17 @@ public class MessageHub(
 
     private async Task<bool> AddToGroup(string groupName)
     {
-        Group? group = await _messagesRepository.GetMessageGroup(groupName);
+        Group? group = await _uow.MessagesRepository.GetMessageGroup(groupName);
         Connection connection = new Connection(Context.ConnectionId, GetUserId());
 
         if (group == null)
         {
             group = new Group(groupName);
-            _messagesRepository.AddGroup(group);
+            _uow.MessagesRepository.AddGroup(group);
         }
 
         group.Connections.Add(connection);
 
-        return await _messagesRepository.SaveAllAsync();
+        return await _uow.Complete();
     }
 }

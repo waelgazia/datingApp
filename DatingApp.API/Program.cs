@@ -27,9 +27,7 @@ builder.Services.AddCors();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPhotoService, PhotoService>();
-builder.Services.AddScoped<IMembersRepository, MembersRepository>();
-builder.Services.AddScoped<ILikesRepository, LikesRepository>();
-builder.Services.AddScoped<IMessagesRepository, MessagesRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<LogUserActivity>();
 builder.Services.AddSignalR();
 builder.Services.AddSingleton<PresenceTracker>();

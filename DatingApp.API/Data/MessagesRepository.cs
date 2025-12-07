@@ -100,9 +100,4 @@ public class MessagesRepository(AppDbContext _dbContext) : IMessagesRepository
             .Where(g => g.Connections.Any(c => c.ConnectionId == connectionId))
             .FirstOrDefaultAsync();
     }
-
-    public async Task<bool> SaveAllAsync()
-    {
-        return await _dbContext.SaveChangesAsync() >= 0;
-    }
 }

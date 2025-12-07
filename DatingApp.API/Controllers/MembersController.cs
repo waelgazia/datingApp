@@ -12,23 +12,14 @@ using DatingApp.API.ResourceParameters;
 namespace DatingApp.API.Controllers;
 
 [Authorize]
-public class MembersController : BaseApiController
+public class MembersController(IUnitOfWork _uow, IPhotoService _photoService) : BaseApiController
 {
-    private readonly IMembersRepository _memberRepository;
-    private readonly IPhotoService _photoService;
-
-    public MembersController(IMembersRepository memberRepository, IPhotoService photoService)
-    {
-        _memberRepository = memberRepository;
-        _photoService = photoService;
-    }
-
     [HttpGet]
     public async Task<ActionResult<PagedList<MemberDto>>>
         GetMembers([FromQuery] MembersParameters membersParameters)
     {
         membersParameters.CurrentMemberId = User.GetMemberId();
-        PagedList<Member> paginatedMembers = await _memberRepository.GetMembersAsync(membersParameters);
+        PagedList<Member> paginatedMembers = await _uow.MembersRepository.GetMembersAsync(membersParameters);
 
         AddPaginationHeader(paginatedMembers);
         return Ok(paginatedMembers.ToMembersDto());
@@ -37,7 +28,7 @@ public class MembersController : BaseApiController
     [HttpGet("{id}")]
     public async Task<ActionResult<MemberDto>> GetMember(string id)
     {
-        Member? member = await _memberRepository.GetMemberByIdAsync(id);
+        Member? member = await _uow.MembersRepository.GetMemberByIdAsync(id);
         if (member == null)
         {
             return NotFound();
@@ -49,7 +40,7 @@ public class MembersController : BaseApiController
     [HttpGet("{id}/photos")]
     public async Task<ActionResult<IReadOnlyList<PhotoDto>>> GetMemberPhotos(string id)
     {
-        IReadOnlyList<Photo> photoEntities = await _memberRepository.GetPhotosForMemberAsync(id);
+        IReadOnlyList<Photo> photoEntities = await _uow.MembersRepository.GetPhotosForMemberAsync(id);
         return Ok(photoEntities.ToPhotosDto());
     }
 
@@ -57,7 +48,7 @@ public class MembersController : BaseApiController
     public async Task<ActionResult> UpdateMember(MemberForUpdateDto memberUpdateDto)
     {
         string memberId = User.GetMemberId();
-        Member? memberEntity = await _memberRepository.GetMemberForUpdateAsync(memberId);
+        Member? memberEntity = await _uow.MembersRepository.GetMemberForUpdateAsync(memberId);
 
         if (memberEntity == null)
         {
@@ -71,7 +62,7 @@ public class MembersController : BaseApiController
 
         memberEntity.User.DisplayName = memberUpdateDto.DisplayName ?? memberEntity.User.DisplayName;
 
-        if (!await _memberRepository.SaveAllAsync())
+        if (!await _uow.Complete())
         {
             return BadRequest("Failed to update member!");
         }
@@ -82,7 +73,7 @@ public class MembersController : BaseApiController
     [HttpPost("add-photo")]
     public async Task<ActionResult<PhotoDto>> AddPhoto([FromForm] IFormFile file)
     {
-        Member? member = await _memberRepository.GetMemberForUpdateAsync(User.GetMemberId());
+        Member? member = await _uow.MembersRepository.GetMemberForUpdateAsync(User.GetMemberId());
         if (member == null)
         {
             return BadRequest("Can not update member!");
@@ -109,7 +100,7 @@ public class MembersController : BaseApiController
 
         member.Photos.Add(photo);
 
-        if (await _memberRepository.SaveAllAsync())
+        if (await _uow.Complete())
         {
             return photo.ToPhotoDto();
         }
@@ -120,7 +111,7 @@ public class MembersController : BaseApiController
     [HttpPut("set-main-photo/{photoId}")]
     public async Task<ActionResult> SetMainPhoto(int photoId)
     {
-        Member? member = await _memberRepository.GetMemberForUpdateAsync(User.GetMemberId());
+        Member? member = await _uow.MembersRepository.GetMemberForUpdateAsync(User.GetMemberId());
         if (member == null)
         {
             return BadRequest("Can not get member from token!");
@@ -135,7 +126,7 @@ public class MembersController : BaseApiController
         member.ImageUrl = photo.Url;
         member.User.ImageUrl = photo.Url;
 
-        if (await _memberRepository.SaveAllAsync())
+        if (await _uow.Complete())
         {
             return NoContent();
         }
@@ -146,7 +137,7 @@ public class MembersController : BaseApiController
     [HttpDelete("delete-photo/{photoId}")]
     public async Task<ActionResult> DeleteMemberPhoto(int photoId)
     {
-        Member? member = await _memberRepository.GetMemberForUpdateAsync(User.GetMemberId());
+        Member? member = await _uow.MembersRepository.GetMemberForUpdateAsync(User.GetMemberId());
         if (member == null) return BadRequest("Can not get member from token!");
 
         Photo? photo = member.Photos.SingleOrDefault(p => p.Id == photoId);
@@ -160,7 +151,7 @@ public class MembersController : BaseApiController
         }
 
         member.Photos.Remove(photo);
-        if (await _memberRepository.SaveAllAsync())
+        if (await _uow.Complete())
         {
             return NoContent();
         }

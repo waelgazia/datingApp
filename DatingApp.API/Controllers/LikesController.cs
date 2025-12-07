@@ -10,19 +10,12 @@ using DatingApp.API.ResourceParameters;
 
 namespace DatingApp.API.Controllers;
 
-public class LikesController : BaseApiController
+public class LikesController(IUnitOfWork _uow) : BaseApiController
 {
-    private readonly ILikesRepository _likesRepository;
-
-    public LikesController(ILikesRepository likesRepository)
-    {
-        _likesRepository = likesRepository;
-    }
-
     [HttpGet("list")]
     public async Task<ActionResult<IReadOnlyList<string>>> GetCurrentMemberIds()
     {
-        return Ok(await _likesRepository.GetCurrentMemberLikeIdsAsync(User.GetMemberId()));
+        return Ok(await _uow.LikesRepository.GetCurrentMemberLikeIdsAsync(User.GetMemberId()));
     }
 
     [HttpGet]
@@ -30,7 +23,7 @@ public class LikesController : BaseApiController
         GetMemberLikes([FromQuery] LikesParameters likesParameters)
     {
         likesParameters.MemberId = User.GetMemberId();
-        PagedList<Member> paginatedMembers = await _likesRepository.GetMemberLikesAsync(likesParameters);
+        PagedList<Member> paginatedMembers = await _uow.LikesRepository.GetMemberLikesAsync(likesParameters);
 
         AddPaginationHeader(paginatedMembers);
         return Ok(paginatedMembers.ToMembersDto());
@@ -43,7 +36,7 @@ public class LikesController : BaseApiController
         if (sourceMemberId == targetMemberId)
             return BadRequest("You cannot like yourself");
 
-        MemberLike? existingLike = await _likesRepository.GetMemberLikeAsync(sourceMemberId, targetMemberId);
+        MemberLike? existingLike = await _uow.LikesRepository.GetMemberLikeAsync(sourceMemberId, targetMemberId);
         if (existingLike == null)
         {
             MemberLike newLike = new MemberLike
@@ -52,14 +45,14 @@ public class LikesController : BaseApiController
                 TargetMemberId = targetMemberId
             };
 
-            _likesRepository.AddLike(newLike);
+            _uow.LikesRepository.AddLike(newLike);
         }
         else
         {
-            _likesRepository.DeleteLike(existingLike);
+            _uow.LikesRepository.DeleteLike(existingLike);
         }
 
-        if (!await _likesRepository.SaveAllChangesAsync())
+        if (!await _uow.Complete())
         {
             return BadRequest("Failed to update like");
         }

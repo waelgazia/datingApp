@@ -10,24 +10,13 @@ using DatingApp.API.ResourceParameters;
 
 namespace DatingApp.API.Controllers;
 
-public class MessagesController : BaseApiController
+public class MessagesController(IUnitOfWork _uow) : BaseApiController
 {
-    private readonly IMembersRepository _membersRepository;
-    private readonly IMessagesRepository _messagesRepository;
-
-    public MessagesController(IMembersRepository membersRepository, IMessagesRepository messagesRepository)
-    {
-        _messagesRepository = messagesRepository
-            ?? throw new ArgumentNullException(nameof(messagesRepository));
-        _membersRepository = membersRepository
-            ?? throw new ArgumentNullException(nameof(membersRepository));
-    }
-
     [HttpPost]
     public async Task<ActionResult<MessageDto>> CreateMessage(MessageForCreationDto messageForCreationDto)
     {
-        Member? sender = await _membersRepository.GetMemberByIdAsync(User.GetMemberId());
-        Member? recipient = await _membersRepository.GetMemberByIdAsync(messageForCreationDto.RecipientId);
+        Member? sender = await _uow.MembersRepository.GetMemberByIdAsync(User.GetMemberId());
+        Member? recipient = await _uow.MembersRepository.GetMemberByIdAsync(messageForCreationDto.RecipientId);
 
         if (sender == null || recipient == null || sender.Id == messageForCreationDto.RecipientId)
         {
@@ -41,8 +30,8 @@ public class MessagesController : BaseApiController
             Content = messageForCreationDto.Content
         };
 
-        _messagesRepository.AddMessage(message);
-        if (!await _messagesRepository.SaveAllAsync())
+        _uow.MessagesRepository.AddMessage(message);
+        if (!await _uow.Complete())
         {
             return BadRequest("Failed to send message!");
         }
@@ -56,7 +45,7 @@ public class MessagesController : BaseApiController
     {
         messageParameters.MemberId = User.GetMemberId();
 
-        PagedList<Message> paginatedMessages = await _messagesRepository
+        PagedList<Message> paginatedMessages = await _uow.MessagesRepository
             .GetMessagesForMemberAsync(messageParameters);
 
         AddPaginationHeader(paginatedMessages);
@@ -66,7 +55,7 @@ public class MessagesController : BaseApiController
     [HttpGet("thread/{otherMemberId}")]
     public async Task<ActionResult<IReadOnlyList<MessageDto>>> GetMessageThread(string otherMemberId)
     {
-        IReadOnlyList<Message> messages = await _messagesRepository
+        IReadOnlyList<Message> messages = await _uow.MessagesRepository
             .GetMessageThreadAsync(User.GetMemberId(), otherMemberId);
 
         return Ok(messages.ToMessagesDto());
@@ -76,7 +65,7 @@ public class MessagesController : BaseApiController
     public async Task<ActionResult> DeleteMessage(string messageId)
     {
         string memberId = User.GetMemberId();
-        Message? message = await _messagesRepository.GetMessageAsync(messageId);
+        Message? message = await _uow.MessagesRepository.GetMessageAsync(messageId);
 
         if (message == null) return NotFound("Cannot delete this message");
         if (memberId != message.SenderId && memberId != message.RecipientId)
@@ -91,10 +80,10 @@ public class MessagesController : BaseApiController
 
         if (message is { SenderDeleted: true, RecipientDeleted: true })
         {
-            _messagesRepository.DeleteMessage(message);
+            _uow.MessagesRepository.DeleteMessage(message);
         }
 
-        if (!await _messagesRepository.SaveAllAsync())
+        if (!await _uow.Complete())
         {
             return BadRequest("Problem deleting the message!");
         }

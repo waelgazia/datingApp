@@ -20,5 +20,4 @@ public interface ILikesRepository
 
     void AddLike(MemberLike like);
     void DeleteLike(MemberLike like);
-    Task<bool> SaveAllChangesAsync();
 }
