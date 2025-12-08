@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using DatingApp.API.Entities;
 using DatingApp.API.Globals;
+using DatingApp.API.Entities;
 
 namespace DatingApp.API.Data.Configurations;
 
@@ -26,5 +26,7 @@ public class PhotoConfiguration : IEntityTypeConfiguration<Photo>
             .WithMany(member => member.Photos)
             .HasForeignKey(photo => photo.MemberId)
             .IsRequired();
+
+        photoBuilder.HasQueryFilter(p => p.IsApproved);
     }
 }

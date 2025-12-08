@@ -4,8 +4,19 @@
       <div class="grid grid-cols-5 auto-rows-min gap-3 p-5 h-[65vh] overflow-auto">
           @for (photo of photos(); track photo.id) {
             <div class="relative">
-              <img src="{{photo.url}}" alt="photo of member" class="w-full rounded-lg">
-              @if(accountService.currentUser()?.id == memberService.member()?.id) {
+              <img src="{{photo.url}}" alt="photo of member"
+                   class="w-full rounded-lg"
+                   [class.opacity-30]="!photo.isApproved">
+
+              @if(!photo.isApproved) {
+                <div class="absolute bottom-2 w-full flex justify-center">
+                  <div class="badge badge-outline outline-1 badge-error font-semibold">
+                    Awaiting for approval
+                  </div>
+                </div>
+              }
+
+              @if(accountService.currentUser()?.id == memberService.member()?.id && photo.isApproved) {
                 <app-star-button
                   class="absolute top-1 right-1"
                   [disabled]="photo.url === memberService.member()?.imageUrl"

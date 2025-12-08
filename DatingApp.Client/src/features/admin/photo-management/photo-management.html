@@ -1,1 +1,17 @@
-<p>photo-management works!</p>
+<div class="grid grid-cols-7 gap-5 mt-4">
+  @for (photo of unapprovedPhotos(); track photo.id) {
+    <div class="card">
+      <img [src]="photo.url" alt="user image" class="rounded-lg"/>
+      <div class="flex w-full gap-3 mt-2">
+        <button class="btn btn-success flex-grow"
+                (click)="approvePhoto(photo.id)">
+          Approve
+        </button>
+        <button class="btn btn-error flex-grow"
+                (click)="rejectPhoto(photo.id)">
+          Reject
+        </button>
+      </div>
+    </div>
+  }
+</div>

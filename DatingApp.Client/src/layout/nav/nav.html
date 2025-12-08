@@ -74,7 +74,9 @@
 
           <input [(ngModel)]="loginDto.password" name="password" type="password" class="input" placeholder="Password">
 
-          <button type="submit" class="btn btn-primary">
+          <button type="submit"
+                  class="btn btn-primary"
+                  [disabled]="!loginDto.email || !loginDto.password">
             @if(loading()) {
               <span class="mr-2 loading loading-spinner"></span>
             }

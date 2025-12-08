@@ -1,7 +1,6 @@
-export interface PhotoDto {
+export interface PhotoForApprovalDto {
   id: number,
   url: string,
-  publicId?: string,
   memberId: string,
   isApproved: boolean
 }

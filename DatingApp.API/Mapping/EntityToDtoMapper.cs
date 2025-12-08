@@ -49,13 +49,30 @@ public static class EntityToDtoMapper
             Id = photo.Id,
             Url = photo.Url,
             PublicId = photo?.PublicId,
-            MemberId = photo!.MemberId
+            MemberId = photo!.MemberId,
+            IsApproved = photo.IsApproved
         };
     }
 
     public static IEnumerable<PhotoDto> ToPhotosDto(this IEnumerable<Photo> photos)
     {
         return photos.Select(photo => photo.ToPhotoDto());
+    }
+
+    public static PhotoForApprovalDto ToPhotoForCreationDto(this Photo photo)
+    {
+        return new PhotoForApprovalDto
+        {
+            Id = photo.Id,
+            Url = photo.Url,
+            UserId = photo.MemberId,
+            IsApproved = photo.IsApproved
+        };
+    }
+
+    public static IEnumerable<PhotoForApprovalDto> ToPhotosForCreationDto(this IEnumerable<Photo> photos)
+    {
+        return photos.Select(photo => photo.ToPhotoForCreationDto());
     }
 
     public static MessageDto ToMessageDto(this Message message)

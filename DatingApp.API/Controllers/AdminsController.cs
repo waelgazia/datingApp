@@ -4,14 +4,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 
 using DatingApp.API.Base;
+using DatingApp.API.DTOs;
 using DatingApp.API.Globals;
+using DatingApp.API.Mapping;
 using DatingApp.API.Entities;
+using DatingApp.API.Interfaces;
 
 namespace DatingApp.API.Controllers;
 
-public class AdminsController(UserManager<AppUser> _userManager) : BaseApiController
+public class AdminsController(
+    UserManager<AppUser> _userManager,
+    IUnitOfWork _uow, IPhotoService
+    _photoService) : BaseApiController
 {
-    [Authorize(Roles = Roles.ADMIN)]
+    [Authorize(Policy = Policies.REQUIRE_ADMIN_ROLE)]
     [HttpGet("admin-secret")]
     public ActionResult<string> GetAdminSecret()
     {
@@ -64,17 +70,65 @@ public class AdminsController(UserManager<AppUser> _userManager) : BaseApiContro
         return Ok(await _userManager.GetRolesAsync(user));
     }
 
-    [Authorize(Policy = Policies.MODERATE_PHOTO_ROLE)]
-    [HttpGet("photos-to-moderate")]
-    public IActionResult GetPhotosForModeration()
+    [Authorize(Policy = Policies.ADMIN_OR_MODERATION_ROLE)]
+    [HttpGet("unapproved-photos")]
+    public async Task<ActionResult<IReadOnlyList<PhotoForApprovalDto>>> GetUnapprovedPhotos()
     {
-        return Ok("Admins or moderators can see this!");
+        IReadOnlyList<Photo> photos = await _uow.PhotosRepository.GetUnapprovedPhotosAsync();
+        return Ok(photos.ToPhotosForCreationDto());
     }
-}
 
+    [Authorize(Policy = Policies.ADMIN_OR_MODERATION_ROLE)]
+    [HttpPost("approve-photo/{photoId}")]
+    public async Task<IActionResult> ApprovePhoto(int photoId)
+    {
+        Photo? photo = await _uow.PhotosRepository.GetPhotoByIdAsync(photoId);
+        if (photo == null) return BadRequest("Can not find the photo");
+        photo.IsApproved = true;
 
-public class Student
-{
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+        Member? member = await _uow.MembersRepository.GetMemberForUpdateAsync(photo.MemberId);
+        if (member == null) return BadRequest("The member does not own the photo");
+
+        // update the member main photo if he does not have one.
+        if (member.ImageUrl == null)
+        {
+            member.ImageUrl = photo.Url;
+            member.User.ImageUrl = photo.Url;
+        }
+
+        if (!await _uow.Complete())
+        {
+            return BadRequest("Failed to approve photo");
+        }
+
+        return Ok();
+    }
+
+    [Authorize(Policy = Policies.ADMIN_OR_MODERATION_ROLE)]
+    [HttpPost("reject-photo/{photoId}")]
+    public async Task<IActionResult> RejectPhoto(int photoId)
+    {
+        Photo? photo = await _uow.PhotosRepository.GetPhotoByIdAsync(photoId);
+        if (photo == null) return BadRequest("Can not find the photo");
+
+        if (photo.PublicId != null)
+        {
+            var result = await _photoService.DeletePhotoAsync(photo.PublicId);
+            if (result.Result == "ok")
+            {
+                _uow.PhotosRepository.DeletePhoto(photo);
+            }
+        }
+        else
+        {
+            _uow.PhotosRepository.DeletePhoto(photo);
+        }
+
+        if (!await _uow.Complete())
+        {
+            return BadRequest("Problem deleting the photo");
+        }
+
+        return NoContent();
+    }
 }

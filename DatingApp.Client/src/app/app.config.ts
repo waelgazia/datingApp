@@ -15,7 +15,11 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withViewTransitions() /* add transition animation when routing */),
-    provideHttpClient(withInterceptors([ errorInterceptor, jwtInterceptor, loadingInterceptor ])),
+    /*
+      Request flow (top → bottom): errorInterceptor, jwtInterceptor, loadingInterceptor
+      and the response runs in the reverse order.
+    */
+    provideHttpClient(withInterceptors([ jwtInterceptor, loadingInterceptor, errorInterceptor ])),
     provideAppInitializer(async () => { /* execute code before loading components */
       const initService = inject(InitService);
       return new Promise<void>((resolve) => {

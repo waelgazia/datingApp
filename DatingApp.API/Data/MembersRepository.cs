@@ -49,12 +49,16 @@ public class MembersRepository(AppDbContext _dbContext) : IMembersRepository
             membersParameters.PageSize);
     }
 
-    public async Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId)
+    public async Task<IReadOnlyList<Photo>>
+        GetPhotosForMemberAsync(string memberId, bool forLoggedInUser = false)
     {
-        return await _dbContext.Members
-            .Where(m => m.Id == memberId)
-            .SelectMany(m => m.Photos)
-            .ToListAsync();
+        IQueryable<Photo> memberPhotosQuery = _dbContext.Members
+                .Where(m => m.Id == memberId)
+                .SelectMany(m => m.Photos);
+
+        if (forLoggedInUser) memberPhotosQuery = memberPhotosQuery.IgnoreQueryFilters();
+
+        return await memberPhotosQuery.ToListAsync();
     }
 
     public void Update(Member member)

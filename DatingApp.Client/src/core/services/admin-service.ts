@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 
 import { UserDto } from '../../interfaces/models/UserDto';
 import { environment } from '../../environments/environment';
+import { PhotoForApprovalDto } from '../../interfaces/models/PhotoForApprovalDto';
 
 @Injectable({
   providedIn: 'root'
@@ -22,5 +23,17 @@ export class AdminService {
 
   getAdminEmail() {
     return environment.adminEmail;
+  }
+
+  getUnapprovedPhotos() {
+    return this._httpClient.get<PhotoForApprovalDto[]>(this._baseUrl + 'admins/unapproved-photos');
+  }
+
+  approvePhoto(photoId: number) {
+    return this._httpClient.post(this._baseUrl + `admins/approve-photo/${photoId}`, {});
+  }
+
+  rejectPhoto(photoId: number) {
+    return this._httpClient.post(this._baseUrl + `admins/reject-photo/${photoId}`, {});
   }
 }

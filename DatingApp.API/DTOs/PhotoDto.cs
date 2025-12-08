@@ -6,4 +6,5 @@ public class PhotoDto
     public required string Url { get; set; }
     public string? PublicId { get; set; }
     public required string MemberId { get; set; }
+    public required bool IsApproved { get; set; }
 }

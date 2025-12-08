@@ -25,10 +25,10 @@ public class MembersController(IUnitOfWork _uow, IPhotoService _photoService) : 
         return Ok(paginatedMembers.ToMembersDto());
     }
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<MemberDto>> GetMember(string id)
+    [HttpGet("{memberId}")]
+    public async Task<ActionResult<MemberDto>> GetMember(string memberId)
     {
-        Member? member = await _uow.MembersRepository.GetMemberByIdAsync(id);
+        Member? member = await _uow.MembersRepository.GetMemberByIdAsync(memberId);
         if (member == null)
         {
             return NotFound();
@@ -37,10 +37,14 @@ public class MembersController(IUnitOfWork _uow, IPhotoService _photoService) : 
         return Ok(member.ToMemberDto());
     }
 
-    [HttpGet("{id}/photos")]
-    public async Task<ActionResult<IReadOnlyList<PhotoDto>>> GetMemberPhotos(string id)
+    [HttpGet("{memberId}/photos")]
+    public async Task<ActionResult<IReadOnlyList<PhotoDto>>> GetMemberPhotos(string memberId)
     {
-        IReadOnlyList<Photo> photoEntities = await _uow.MembersRepository.GetPhotosForMemberAsync(id);
+        // return only approved images unless the for the logged in user.
+        bool isLoggedInUser = User.GetMemberId() == memberId;
+        IReadOnlyList<Photo> photoEntities =
+            await _uow.MembersRepository.GetPhotosForMemberAsync(memberId, isLoggedInUser);
+
         return Ok(photoEntities.ToPhotosDto());
     }
 
@@ -91,12 +95,6 @@ public class MembersController(IUnitOfWork _uow, IPhotoService _photoService) : 
             PublicId = uploadResult.PublicId,
             MemberId = User.GetMemberId()
         };
-
-        if (member.ImageUrl == null)
-        {
-            member.ImageUrl = photo.Url;
-            member.User.ImageUrl = photo.Url;
-        }
 
         member.Photos.Add(photo);
 

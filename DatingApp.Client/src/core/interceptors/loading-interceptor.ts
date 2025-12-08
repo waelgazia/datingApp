@@ -27,13 +27,16 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   if (req.method.includes('POST') && req.url.includes('/likes')) {
     invalidateCache('/likes')
   }
-  if (req.method.includes('POST') && req.url.includes('/messages')) {
+  else if (req.method.includes('POST') && req.url.includes('/messages')) {
     invalidateCache('/messages')
   }
-  if (req.method.includes('DELETE') && req.url.includes('/messages')) {
+  else if (req.method.includes('DELETE') && req.url.includes('/messages')) {
     invalidateCache('/messages')
   }
-  if (req.method.includes('POST') && req.url.includes('/logout')) {
+  else if (req.method.includes('POST') && req.url.includes('admins')) {
+    invalidateCache('/admins')
+  }
+  else if (req.method.includes('POST') && req.url.includes('/logout')) {
     cache.clear(); // clear the cache when the user logout.
   }
 

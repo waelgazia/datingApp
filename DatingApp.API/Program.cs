@@ -80,7 +80,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorizationBuilder()
     .AddPolicy(Policies.REQUIRE_ADMIN_ROLE, policy => policy.RequireRole(Roles.ADMIN))
-    .AddPolicy(Policies.MODERATE_PHOTO_ROLE, policy => policy.RequireRole(Roles.MODERATOR));
+    .AddPolicy(Policies.MODERATION_ROLE, policy => policy.RequireRole(Roles.MODERATOR))
+    .AddPolicy(Policies.ADMIN_OR_MODERATION_ROLE, policy => policy.RequireRole(Roles.ADMIN, Roles.MODERATOR));
 
 var app = builder.Build();
 

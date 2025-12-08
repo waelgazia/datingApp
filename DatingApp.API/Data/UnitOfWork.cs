@@ -9,6 +9,7 @@ public class UnitOfWork(AppDbContext _dbContext) : IUnitOfWork
     private IMembersRepository? _memberRepository;
     private ILikesRepository? _likesRepository;
     private IMessagesRepository? _messageRepository;
+    private IPhotosRepository? _photosRepository;
 
     public IMembersRepository MembersRepository =>
         _memberRepository ??= new MembersRepository(_dbContext);
@@ -18,6 +19,9 @@ public class UnitOfWork(AppDbContext _dbContext) : IUnitOfWork
 
     public IMessagesRepository MessagesRepository =>
         _messageRepository ??= new MessagesRepository(_dbContext);
+
+    public IPhotosRepository PhotosRepository =>
+        _photosRepository ??= new PhotosRepository(_dbContext);
 
     public async Task<bool> Complete()
     {
