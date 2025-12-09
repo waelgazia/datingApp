@@ -1,5 +1,7 @@
-import { Component, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Component, inject, signal } from '@angular/core';
+
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-test-errors',
@@ -9,39 +11,39 @@ import { HttpClient } from '@angular/common/http';
 })
 export class TestErrors {
   private _httpClient = inject(HttpClient);
-  private baseUrl = 'https://localhost:5001/api';
+  private baseUrl = environment.apiUrl;
   validationError = signal<string[]>([]);
 
   get404Error() {
-    this._httpClient.get(this.baseUrl + '/buggy/not-found').subscribe({
+    this._httpClient.get(this.baseUrl + 'buggy/not-found').subscribe({
       next: res => console.log(res),
       error: error => console.log(error)
     });
   }
 
   get400Error() {
-    this._httpClient.get(this.baseUrl + '/buggy/bad-request').subscribe({
+    this._httpClient.get(this.baseUrl + 'buggy/bad-request').subscribe({
       next: res => console.log(res),
       error: error => console.log(error)
     });
   }
 
   get401Error() {
-    this._httpClient.get(this.baseUrl + '/buggy/not-authorized').subscribe({
+    this._httpClient.get(this.baseUrl + 'buggy/not-authorized').subscribe({
       next: res => console.log(res),
       error: error => console.log(error)
     });
   }
 
   get500Error() {
-    this._httpClient.get(this.baseUrl + '/buggy/server-error').subscribe({
+    this._httpClient.get(this.baseUrl + 'buggy/server-error').subscribe({
       next: res => console.log(res),
       error: error => console.log(error)
     });
   }
 
   get400ValidationError() {
-    this._httpClient.post(this.baseUrl + '/accounts/register', {}).subscribe({
+    this._httpClient.post(this.baseUrl + 'accounts/register', {}).subscribe({
       next: res => console.log(res),
       error: error => {
         console.log(error);
