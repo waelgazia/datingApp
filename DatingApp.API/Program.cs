@@ -99,9 +99,14 @@ app.UseCors(corsPolicy => corsPolicy
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseDefaultFiles();      // changes the request path '/' (default) to '/index.html' or the default html page
+app.UseStaticFiles();       // serves static files under wwwroot folder.
+
 app.MapControllers();
 app.MapHub<PresenceHub>("hubs/presence");
 app.MapHub<MessageHub>("hubs/messages");
+
+app.MapFallbackToController("Index", "Fallback");
 
 // database seeding
 using (IServiceScope scope = app.Services.CreateScope())
