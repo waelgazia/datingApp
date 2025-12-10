@@ -15,7 +15,7 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
         memberBuilder.HasKey(member => member.Id);
         memberBuilder.Property(member => member.Id)
             .HasColumnType(Constants.STRING_COLUMN_TYPE)
-            .HasMaxLength(Rules.MAX_GUID_LENGTH)
+            .HasMaxLength(Rules.MAX_ASP_IDENTITY_ID_LENGTH)
             .ValueGeneratedNever();
 
         memberBuilder.Property(user => user.DisplayName)
@@ -24,10 +24,8 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
             .IsRequired();
 
         memberBuilder.Property(user => user.ImageUrl)
-            .HasColumnType(Constants.STRING_COLUMN_TYPE);
+            .HasColumnType(Constants.DEFAULT_STRING_COLUMN_TYPE);
 
-        memberBuilder.Property(user => user.DateOfBirth)
-            .HasColumnType(Constants.DATETIME_COLUMN_TYPE);
         memberBuilder.Property(user => user.Created)
             .HasColumnType(Constants.DATETIME_COLUMN_TYPE);
         memberBuilder.Property(user => user.LastActive)
@@ -39,8 +37,7 @@ public class MemberConfiguration : IEntityTypeConfiguration<Member>
             .IsRequired();
 
         memberBuilder.Property(user => user.Description)
-            .HasColumnType(Constants.STRING_COLUMN_TYPE)
-            .HasMaxLength(Rules.MAX_DESCRIPTION_LENGTH);
+            .HasColumnType(Constants.MAX_STRING_COLUMN_TYPE);
 
         memberBuilder.Property(user => user.City)
             .HasColumnType(Constants.STRING_COLUMN_TYPE)

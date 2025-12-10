@@ -21,7 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty);
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty);
 });
 builder.Services.AddCors();
 

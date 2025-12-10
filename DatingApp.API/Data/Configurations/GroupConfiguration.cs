@@ -14,7 +14,7 @@ public class GroupConfiguration : IEntityTypeConfiguration<Group>
 
         groupBuilder.HasKey(g => g.Name);
         groupBuilder.Property(g => g.Name)
-            .HasColumnType(Constants.STRING_COLUMN_TYPE)
+            .HasColumnType(Constants.DEFAULT_STRING_COLUMN_TYPE)
             .ValueGeneratedNever();
     }
 }

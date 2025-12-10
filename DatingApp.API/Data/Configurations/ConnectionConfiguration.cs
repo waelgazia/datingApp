@@ -14,7 +14,7 @@ public class ConnectionConfiguration : IEntityTypeConfiguration<Connection>
 
         connectionBuilder.HasKey(c => c.ConnectionId);
         connectionBuilder.Property(c => c.ConnectionId)
-            .HasColumnType(Constants.STRING_COLUMN_TYPE)
+            .HasColumnType(Constants.DEFAULT_STRING_COLUMN_TYPE)
             .ValueGeneratedNever();
 
         connectionBuilder.Property(c => c.UserId)
