@@ -486,3 +486,5 @@ $RECYCLE.BIN/
 # project specific files
 DatingApp.API/datingApp.db*
 DatingApp.API/appsettings.json
+
+DatingApp.API/wwwroot/
