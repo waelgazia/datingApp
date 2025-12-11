@@ -21,7 +21,6 @@ export class Paginator {
   onPageChanged(newPageNumber?: number, pageSize?: EventTarget | null) {
     if (newPageNumber) {
       this.paginationData.update(data => ({ ...data, pageNumber: newPageNumber }));
-      console.log(this.paginationData);
     }
     if (pageSize) {
       const newPageSize = Number((pageSize as HTMLSelectElement).value);

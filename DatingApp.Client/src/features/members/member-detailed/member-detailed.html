@@ -23,7 +23,9 @@
         <ul class="menu rounded-box w-full text-xl">
           <li><a routerLink="profile" routerLinkActive="text-primary">Profile</a></li>
           <li><a routerLink="photos" routerLinkActive="text-primary">Photos</a></li>
-          <li><a routerLink="messages" routerLinkActive="text-primary">Messages</a></li>
+          @if (!isCurrentUser()) {
+            <li><a routerLink="messages" routerLinkActive="text-primary">Messages</a></li>
+          }
         </ul>
       </div>
 

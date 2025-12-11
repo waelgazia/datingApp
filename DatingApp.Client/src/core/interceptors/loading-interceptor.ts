@@ -5,7 +5,14 @@ import { HttpEvent, HttpInterceptorFn, HttpParams } from '@angular/common/http';
 import { BusyService } from '../services/busy-service';
 import { environment } from '../../environments/environment';
 
-const cache = new Map<string, HttpEvent<unknown>>();
+
+type CacheEntry = {
+  response: HttpEvent<unknown>;
+  timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry>();
+const CACHE_DURATION_MS = 5 * 60 * 1000; /* 5 minutes */
 
 export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   const busyService = inject(BusyService);
@@ -43,8 +50,15 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
 
   if (req.method === 'GET') {
     const cachedResponse = cache.get(cacheKey);
+
     if (cachedResponse) {
-      return of(cachedResponse);
+      const isExpired = (Date.now() - cachedResponse.timestamp) > CACHE_DURATION_MS;
+      if (!isExpired) {
+        return of(cachedResponse.response);
+      } else {
+        cache.delete(cacheKey);
+      }
+
     }
   }
 
@@ -53,7 +67,10 @@ export const loadingInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     (environment.production ? identity : delay(500)), // no need to use delay in production
     tap(response => {
-      cache.set(cacheKey, response)
+      cache.set(cacheKey, {
+        response,
+        timestamp: Date.now()
+      })
     }),
     finalize(() => busyService.idle())
   );

@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Component, effect, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, effect, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 
 import { TimeAgoPipe } from '../../../core/pipes/time-ago-pipe';
 import { MemberService } from '../../../core/services/member-service';
@@ -22,7 +22,7 @@ export class MemberMessages implements OnInit, OnDestroy {
 
   protected messagesService = inject(MessagesService);
   protected presenceService = inject(PresenceService);
-  protected messageContent = '';
+  protected messageContent = signal<string>('');
 
   constructor() {
     // The code inside effect() runs immediately once when the component is constructed,
@@ -54,11 +54,12 @@ export class MemberMessages implements OnInit, OnDestroy {
 
   sendMessage() {
     const recipientId = this._memberService.member()?.id;
-    if (!recipientId || this.messageContent === '') return;
+    if (!recipientId || !this.messageContent()) return;
 
-    this.messagesService.sendMessage(recipientId, this.messageContent)?.then(() => {
-      this.messageContent = '';
-    });
+    this.messagesService.sendMessage(recipientId, this.messageContent())
+      ?.then(() => {
+        this.messageContent.set('');
+      });
   }
 
   scrollToBottom() {
