@@ -15,6 +15,9 @@ export class FilterModal {
 
   modalClosed = output();
   dataSubmitted = output<MembersParameters>();
+
+  // model(): two-way binding used when a child component needs to receive a
+  // value, update it back to the parent (input read-only input from parent)
   membersParameters = model(new MembersParameters());
 
   constructor() {

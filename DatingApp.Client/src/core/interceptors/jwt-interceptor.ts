@@ -8,8 +8,8 @@ import { AccountService } from '../services/account-service';
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   const accountService = inject(AccountService)
-  // when you copy a signal (in this case assigning accountService.currentUser to user)
-  // it won't be signal anymore
+  // copying a signal (e.g., const user = accountService.currentUser())
+  // the 'user' won't be signal anymore
   const user = accountService.currentUser();
 
   if (user) {

@@ -16,8 +16,8 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes, withViewTransitions() /* add transition animation when routing */),
     /*
-      Request flow (top → bottom): errorInterceptor, jwtInterceptor, loadingInterceptor
-      and the response runs in the reverse order.
+      Request flow (left → right): jwtInterceptor, loadingInterceptor, errorInterceptor
+      and the response runs in the reverse order (left <- right).
     */
     provideHttpClient(withInterceptors([ jwtInterceptor, loadingInterceptor, errorInterceptor ])),
     provideAppInitializer(async () => { /* execute code before loading components */
